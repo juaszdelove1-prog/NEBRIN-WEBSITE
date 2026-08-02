@@ -1,0 +1,11 @@
+{
+  "name": "NEBRIN Online Service Company Limited",
+  "short_name": "NEBRIN",
+  "description": "Digital, business and government-service support platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#061b46",
+  "orientation": "portrait-primary",
+  "icons": []
+}
