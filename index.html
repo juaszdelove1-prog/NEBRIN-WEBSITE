@@ -236,33 +236,33 @@
           </label>
           <label>
             Select Service
-            <select name="service" required>
-              <option value="">Choose a service</option>
-              <option>SIM Registration Management</option>
-              <option>Lipa Number Registration</option>
-              <option>Birth Certificate Support</option>
-              <option>TIN Registration</option>
-              <option>Company Registration</option>
-              <option>Business Name Registration</option>
-              <option>Business License Processing</option>
-              <option>Website Development</option>
-              <option>Mobile App Development</option>
-              <option>Logo & Graphic Design</option>
-              <option>Digital Marketing</option>
-              <option>Entrepreneurship Training</option>
-              <option>Business Development Training</option>
-              <option>Youth Recruitment</option>
-              <option>E-commerce Solutions</option>
+            <select name="service" id="serviceSelect" required>
+              <option value="">Loading services…</option>
             </select>
           </label>
           <label class="full">
             Message
             <textarea name="message" rows="5" placeholder="Tell us what you need"></textarea>
           </label>
+          <div id="serviceInfoBox" class="service-info-box full hidden">
+            <h3 id="serviceInfoName"></h3>
+            <p id="serviceInfoDescription"></p>
+            <div class="service-meta">
+              <span id="serviceInfoPrice"></span>
+              <span id="serviceInfoDuration"></span>
+            </div>
+          </div>
+
+          <div id="requiredDocumentsBox" class="required-documents-box full hidden">
+            <h3>Required Documents</h3>
+            <p>Attach the documents listed below. Each document must be uploaded separately.</p>
+            <div id="dynamicDocumentFields"></div>
+          </div>
+
           <label class="full upload-field">
-            Supporting Documents
+            Additional Supporting Documents
             <input id="applicationFiles" type="file" accept=".pdf,.jpg,.jpeg,.png" multiple />
-            <small>Optional: PDF, JPG or PNG. Maximum 5 files, 5 MB each.</small>
+            <small>Optional: PDF, JPG or PNG. Maximum 5 additional files, 5 MB each.</small>
           </label>
           <div id="selectedFiles" class="selected-files full"></div>
           <div class="submission-options full">
