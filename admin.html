@@ -31,7 +31,7 @@ table{width:100%;border-collapse:collapse;background:#fff}th,td{padding:12px;bor
 </section>
 
 <section id="dashboardPanel" class="hidden">
-<div class="admin-header">
+<div class="live-indicator"><span class="live-dot"></span>Live updates enabled</div><div class="admin-header">
 <div><p class="section-label">ADMIN DASHBOARD</p><h1>Customer Applications</h1></div>
 <button id="logoutBtn" class="logout">Log Out</button>
 </div>
@@ -78,6 +78,7 @@ TIN Certificate?"></textarea></label>
       <div class="stat-card"><span>Deleted</span><strong id="statDeleted">0</strong></div>
       <div class="stat-card"><span>Payment Submitted</span><strong id="statPaymentSubmitted">0</strong></div>
       <div class="stat-card"><span>Payment Confirmed</span><strong id="statPaymentConfirmed">0</strong></div>
+<div class="stat-card"><span>Payment Bills Generated</span><strong id="statPaymentBills">0</strong></div>
     </div>
     <div class="dashboard-card">
       <div class="toolbar">
@@ -86,7 +87,76 @@ TIN Certificate?"></textarea></label>
       </div>
       <div id="reportSummary"></div>
     </div>
-    <div class="dashboard-card">
+    
+<div class="payment-manager">
+  <h2>Payment Method Management</h2>
+  <p>Add or update payment instructions that customers will see automatically.</p>
+
+  <div class="service-form-grid">
+    <input id="paymentMethodId" type="hidden">
+
+    <label>Provider
+      <select id="paymentProvider">
+        <option value="">Choose provider</option>
+        <option>Lipa kwa M-Pesa</option>
+        <option>M-Pesa</option>
+        <option>Mixx by Yas Lipa</option>
+        <option>HaloPesa Lipa</option>
+        <option>Airtel Lipa</option>
+        <option>Airtel Money</option>
+        <option>CRDB Bank</option>
+        <option>NMB Bank</option>
+        <option>NBC Bank</option>
+        <option value="__custom__">Other / Custom</option>
+      </select>
+      <input id="paymentProviderCustom" class="hidden" type="text" placeholder="Custom provider">
+    </label>
+
+    <label>Payment Type
+      <select id="paymentType">
+        <option value="Lipa Number">Lipa Number</option>
+        <option value="Till Number">Till Number</option>
+        <option value="Paybill">Paybill</option>
+        <option value="Phone Number">Phone Number</option>
+        <option value="Bank Account">Bank Account</option>
+      </select>
+    </label>
+
+    <label>Account / Number
+      <input id="paymentNumber" type="text" placeholder="Enter account, till or phone number">
+    </label>
+
+    <label>Account Name
+      <input id="paymentAccountName" type="text" placeholder="Name shown during payment">
+    </label>
+
+    <label class="full">Instructions
+      <textarea id="paymentInstructions" rows="3" placeholder="Extra payment instructions"></textarea>
+    </label>
+
+    <label>Status
+      <select id="paymentActive">
+        <option value="true">Active — visible to customers</option>
+        <option value="false">Inactive — hidden</option>
+      </select>
+    </label>
+
+    <div>
+      <button id="savePaymentMethodBtn" class="btn btn-primary" type="button">Save Payment Method</button>
+      <button id="clearPaymentMethodBtn" class="btn btn-secondary-admin" type="button">Clear Form</button>
+    </div>
+  </div>
+
+  <p id="paymentManagerStatus"></p>
+  <div id="paymentMethodList" class="payment-method-list"></div>
+</div>
+
+<div class="appointment-panel"><h2>Appointments</h2><div class="dashboard-stats">
+<div class="stat-card"><span>Pending Appointments</span><strong id="statAppointmentPending">0</strong></div>
+<div class="stat-card"><span>Confirmed Appointments</span><strong id="statAppointmentConfirmed">0</strong></div>
+<div class="stat-card"><span>Average Rating</span><strong id="statAverageRating">0.0</strong></div>
+<div class="stat-card"><span>Total Feedback</span><strong id="statFeedbackCount">0</strong></div></div>
+<div id="appointmentList" class="appointment-list"></div></div><div class="dashboard-card">
 <div class="toolbar">
 <input id="searchBox" type="search" placeholder="Search name, phone, reference…">
 <select id="statusFilter"><option value="">All statuses</option><option>New</option><option>Processing</option><option>Completed</option><option>Rejected</option><option>Deleted</option></select>

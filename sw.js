@@ -1,18 +1,19 @@
-const CACHE_NAME = 'nebrin-v10';
-const APP_SHELL = [
+const CACHE_NAME = 'nebrin-v20-final';
+const CORE_ASSETS = [
   '/',
   '/index.html',
   '/styles.css',
   '/script.js',
-  '/growth.js',
   '/i18n.js',
   '/track.html',
   '/track.js',
-  '/supabase-config.js'
+  '/admin.html',
+  '/admin.js',
+  '/manifest.webmanifest'
 ];
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS)));
   self.skipWaiting();
 });
 
@@ -34,6 +35,6 @@ self.addEventListener('fetch', event => {
         caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
         return response;
       })
-      .catch(() => caches.match(event.request).then(cached => cached || caches.match('/index.html')))
+      .catch(() => caches.match(event.request).then(match => match || caches.match('/index.html')))
   );
 });

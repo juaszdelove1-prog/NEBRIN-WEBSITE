@@ -324,3 +324,60 @@ document.addEventListener('nebrin-language-changed', () => {
   const selected = activeServices.find(item => item.id === serviceSelect?.value);
   if (selected) renderServiceDetails(selected);
 });
+
+const appointmentForm=document.getElementById('appointmentForm');
+const appointmentStatus=document.getElementById('appointmentStatus');
+function showAppointmentStatus(message,type){
+  appointmentStatus.textContent=window.i18nTranslate?window.i18nTranslate(message):message;
+  appointmentStatus.className=`form-status full show ${type}`;
+}
+appointmentForm?.addEventListener('submit',async(event)=>{
+  event.preventDefault();
+  const data=new FormData(appointmentForm);
+  const payload={
+    full_name:String(data.get('appointment_name')||'').trim(),
+    phone:String(data.get('appointment_phone')||'').trim(),
+    email:String(data.get('appointment_email')||'').trim(),
+    office:String(data.get('appointment_office')||'').trim(),
+    appointment_date:String(data.get('appointment_date')||'').trim(),
+    appointment_time:String(data.get('appointment_time')||'').trim(),
+    purpose:String(data.get('appointment_purpose')||'').trim()
+  };
+  if(!payload.full_name||!payload.phone||!payload.office||!payload.appointment_date||!payload.appointment_time||!payload.purpose){
+    showAppointmentStatus('Please complete all required appointment fields.','error');return;
+  }
+  showAppointmentStatus('Submitting appointment request…','success');
+  const {data:result,error}=await supabaseClient.rpc('book_appointment',payload);
+  if(error){showAppointmentStatus(error.message||'Unable to book appointment.','error');return;}
+  showAppointmentStatus(`Appointment request submitted. Reference: ${result}`,'success');
+  appointmentForm.reset();
+});
+
+async function loadPublicPaymentMethods(){
+  const box=document.getElementById('publicPaymentMethods');
+  if(!box)return;
+
+  const {data,error}=await supabaseClient
+    .from('payment_methods')
+    .select('*')
+    .eq('is_active',true)
+    .order('provider');
+
+  if(error){
+    console.error(error);
+    box.innerHTML='<p>Payment methods are temporarily unavailable.</p>';
+    return;
+  }
+
+  const methods=data||[];
+  box.innerHTML=methods.map(method=>`
+    <article class="public-payment-card">
+      <h3>${escapeHtml(method.provider)}</h3>
+      <p><strong>${escapeHtml(method.payment_type)}:</strong> ${escapeHtml(method.account_number)}</p>
+      <p><strong>Account Name:</strong> ${escapeHtml(method.account_name||'NEBRIN')}</p>
+      ${method.instructions?`<p>${escapeHtml(method.instructions)}</p>`:''}
+    </article>
+  `).join('')||'<p>No active payment methods yet.</p>';
+}
+
+loadPublicPaymentMethods();

@@ -1,7 +1,7 @@
 const loginPanel=document.getElementById('loginPanel'),dashboardPanel=document.getElementById('dashboardPanel'),resetPanel=document.getElementById('resetPanel');
 const body=document.getElementById('applicationsBody'),mobileBox=document.getElementById('mobileApplications');let applications=[];
 async function checkSession(){const {data}=await supabaseClient.auth.getSession();if(data.session)showDashboard();}
-async function showDashboard(){loginPanel.classList.add('hidden');resetPanel.classList.add('hidden');dashboardPanel.classList.remove('hidden');await Promise.all([loadApplications(), loadServices()]);}
+async function showDashboard(){loginPanel.classList.add('hidden');resetPanel.classList.add('hidden');dashboardPanel.classList.remove('hidden');await Promise.all([loadApplications(), loadServices(), loadAppointments(), loadFeedbackSummary(), loadPaymentMethods(), loadPaymentBillCount()]);subscribeRealtime();}
 document.getElementById('loginBtn').addEventListener('click',async()=>{const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value,status=document.getElementById('loginStatus');status.textContent='Signing in…';const {error}=await supabaseClient.auth.signInWithPassword({email,password});if(error){status.className='error';status.textContent=error.message;return;}await showDashboard();});
 document.getElementById('logoutBtn').addEventListener('click',async()=>{await supabaseClient.auth.signOut();location.reload();});
 document.getElementById('refreshBtn').addEventListener('click',loadApplications);
@@ -385,4 +385,164 @@ document.getElementById('exportAuditBtn')?.addEventListener('click',async()=>{
   downloadCsv(`nebrin-audit-log-${new Date().toISOString().slice(0,10)}.csv`,data||[]);
 });
 
+
+let paymentMethods=[];
+
+function selectedPaymentProvider(){
+  const value=document.getElementById('paymentProvider').value;
+  return value==='__custom__'
+    ? document.getElementById('paymentProviderCustom').value.trim()
+    : value.trim();
+}
+
+document.getElementById('paymentProvider')?.addEventListener('change',()=>{
+  const custom=document.getElementById('paymentProviderCustom');
+  custom.classList.toggle('hidden',document.getElementById('paymentProvider').value!=='__custom__');
+});
+
+function clearPaymentMethodForm(){
+  document.getElementById('paymentMethodId').value='';
+  document.getElementById('paymentProvider').value='';
+  document.getElementById('paymentProviderCustom').value='';
+  document.getElementById('paymentProviderCustom').classList.add('hidden');
+  document.getElementById('paymentType').value='Lipa Number';
+  document.getElementById('paymentNumber').value='';
+  document.getElementById('paymentAccountName').value='';
+  document.getElementById('paymentInstructions').value='';
+  document.getElementById('paymentActive').value='true';
+}
+
+async function loadPaymentMethods(){
+  const status=document.getElementById('paymentManagerStatus');
+  if(status) status.textContent='Loading payment methods…';
+
+  const {data,error}=await supabaseClient
+    .from('payment_methods')
+    .select('*')
+    .order('provider');
+
+  if(error){
+    if(status){status.className='error';status.textContent=error.message;}
+    return;
+  }
+
+  paymentMethods=data||[];
+  if(status){status.className='';status.textContent=`${paymentMethods.length} payment method(s)`;}
+  renderPaymentMethods();
+}
+
+function renderPaymentMethods(){
+  const box=document.getElementById('paymentMethodList');
+  if(!box)return;
+
+  box.innerHTML=paymentMethods.map(method=>`
+    <article class="payment-method-item">
+      <h3>${esc(method.provider)}</h3>
+      <p><strong>${esc(method.payment_type)}:</strong> ${esc(method.account_number)}</p>
+      <p><strong>Account Name:</strong> ${esc(method.account_name||'')}</p>
+      <p><strong>Status:</strong> ${method.is_active?'Active':'Inactive'}</p>
+      ${method.instructions?`<p>${esc(method.instructions)}</p>`:''}
+      <div class="actions">
+        <button onclick="editPaymentMethod('${method.id}')">Edit</button>
+        <button onclick="togglePaymentMethod('${method.id}',${!method.is_active})">${method.is_active?'Deactivate':'Activate'}</button>
+        <button class="btn-danger" onclick="deletePaymentMethod('${method.id}')">Delete</button>
+      </div>
+    </article>
+  `).join('')||'<p>No payment methods added yet.</p>';
+}
+
+window.editPaymentMethod=function(id){
+  const method=paymentMethods.find(item=>item.id===id);
+  if(!method)return;
+
+  document.getElementById('paymentMethodId').value=method.id;
+
+  const providerSelect=document.getElementById('paymentProvider');
+  if([...providerSelect.options].some(option=>option.value===method.provider)){
+    providerSelect.value=method.provider;
+    document.getElementById('paymentProviderCustom').classList.add('hidden');
+  }else{
+    providerSelect.value='__custom__';
+    document.getElementById('paymentProviderCustom').classList.remove('hidden');
+    document.getElementById('paymentProviderCustom').value=method.provider;
+  }
+
+  document.getElementById('paymentType').value=method.payment_type;
+  document.getElementById('paymentNumber').value=method.account_number;
+  document.getElementById('paymentAccountName').value=method.account_name||'';
+  document.getElementById('paymentInstructions').value=method.instructions||'';
+  document.getElementById('paymentActive').value=String(method.is_active);
+};
+
+window.togglePaymentMethod=async function(id,is_active){
+  const {error}=await supabaseClient.from('payment_methods').update({is_active}).eq('id',id);
+  if(error)alert(error.message);else loadPaymentMethods();
+};
+
+window.deletePaymentMethod=async function(id){
+  if(!confirm('Delete this payment method?'))return;
+  const {error}=await supabaseClient.from('payment_methods').delete().eq('id',id);
+  if(error)alert(error.message);else loadPaymentMethods();
+};
+
+document.getElementById('savePaymentMethodBtn')?.addEventListener('click',async()=>{
+  const id=document.getElementById('paymentMethodId').value;
+  const provider=selectedPaymentProvider();
+  const payment_type=document.getElementById('paymentType').value;
+  const account_number=document.getElementById('paymentNumber').value.trim();
+  const account_name=document.getElementById('paymentAccountName').value.trim();
+  const instructions=document.getElementById('paymentInstructions').value.trim();
+  const is_active=document.getElementById('paymentActive').value==='true';
+  const status=document.getElementById('paymentManagerStatus');
+
+  if(!provider||!account_number){
+    status.className='error';
+    status.textContent='Provider and account/number are required.';
+    return;
+  }
+
+  const payload={provider,payment_type,account_number,account_name,instructions,is_active};
+  const result=id
+    ? await supabaseClient.from('payment_methods').update(payload).eq('id',id)
+    : await supabaseClient.from('payment_methods').insert([payload]);
+
+  if(result.error){
+    status.className='error';
+    status.textContent=result.error.message;
+    return;
+  }
+
+  status.className='success';
+  status.textContent='Payment method saved successfully.';
+  clearPaymentMethodForm();
+  loadPaymentMethods();
+});
+
+document.getElementById('clearPaymentMethodBtn')?.addEventListener('click',clearPaymentMethodForm);
+
 checkSession();
+let appointments=[];
+async function loadAppointments(){
+ const {data,error}=await supabaseClient.from('appointments').select('*').order('appointment_date').order('appointment_time');
+ if(error){console.error(error);return;}appointments=data||[];
+ document.getElementById('statAppointmentPending').textContent=appointments.filter(a=>a.status==='Pending').length;
+ document.getElementById('statAppointmentConfirmed').textContent=appointments.filter(a=>a.status==='Confirmed').length;
+ document.getElementById('appointmentList').innerHTML=appointments.map(a=>`<article class="appointment-item"><h3>${esc(a.full_name)} — ${esc(a.office)}</h3><div class="appointment-meta"><span>${esc(a.appointment_date)}</span><span>${esc(a.appointment_time)}</span><span>${esc(a.status)}</span><span>${esc(a.phone)}</span></div><p>${esc(a.purpose)}</p><div class="actions"><button onclick="setAppointmentStatus('${a.id}','Confirmed')">Confirm</button><button onclick="setAppointmentStatus('${a.id}','Completed')">Complete</button><button class="btn-danger" onclick="setAppointmentStatus('${a.id}','Cancelled')">Cancel</button></div></article>`).join('')||'<p>No appointments yet.</p>';
+}
+window.setAppointmentStatus=async function(id,status){const {error}=await supabaseClient.from('appointments').update({status}).eq('id',id);if(error)alert(error.message);else loadAppointments();};
+async function loadFeedbackSummary(){
+ const {data,error}=await supabaseClient.from('customer_feedback').select('rating');if(error){console.error(error);return;}
+ const rows=data||[];document.getElementById('statAverageRating').textContent=(rows.length?rows.reduce((s,r)=>s+Number(r.rating),0)/rows.length:0).toFixed(1);document.getElementById('statFeedbackCount').textContent=rows.length;
+}
+function subscribeRealtime(){
+ supabaseClient.channel('nebrin-admin-live').on('postgres_changes',{event:'*',schema:'public',table:'applications'},()=>loadApplications()).on('postgres_changes',{event:'*',schema:'public',table:'appointments'},()=>loadAppointments()).on('postgres_changes',{event:'*',schema:'public',table:'customer_feedback'},()=>loadFeedbackSummary()).subscribe();
+}
+
+async function loadPaymentBillCount(){
+  const {count,error}=await supabaseClient
+    .from('payment_requests')
+    .select('*',{count:'exact',head:true});
+  if(error){console.error(error);return;}
+  const el=document.getElementById('statPaymentBills');
+  if(el)el.textContent=count||0;
+}
