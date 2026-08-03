@@ -146,3 +146,23 @@ VERSION 11 — REPORTING AND AUDIT
 Required:
 1. Run v11-migration.sql in Supabase SQL Editor.
 2. Upload Version 11 files to GitHub after the Vercel rate limit is lifted.
+
+VERSION 12
+- Office appointment booking.
+- Admin appointment management.
+- Customer feedback after completed service.
+- Average rating dashboard.
+- Realtime-ready admin updates.
+Run v12-migration.sql, then upload all files to GitHub.
+
+VERSION 13 — PAYMENT METHOD MANAGEMENT
+--------------------------------------
+- Admin can add, edit, activate, deactivate and delete payment methods.
+- Active methods display automatically to customers.
+- Supports M-Pesa, Airtel Money, Mixx by Yas, HaloPesa and bank accounts.
+- No real payment API is connected yet; this version manages payment instructions safely.
+- Replace placeholder numbers/accounts in Admin before activation.
+
+Required:
+1. Run v13-migration.sql in Supabase.
+2. Upload Version 13 only after the current Vercel rate limit has ended.
