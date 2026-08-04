@@ -1,16 +1,44 @@
 const loginPanel=document.getElementById('loginPanel'),dashboardPanel=document.getElementById('dashboardPanel'),resetPanel=document.getElementById('resetPanel');
-const body=document.getElementById('applicationsBody'),mobileBox=document.getElementById('mobileApplications');let applications=[];
-async function checkSession(){const {data}=await supabaseClient.auth.getSession();if(data.session)showDashboard();}
-async function showDashboard(){loginPanel.classList.add('hidden');resetPanel.classList.add('hidden');dashboardPanel.classList.remove('hidden');await Promise.all([loadApplications(), loadServices(), loadAppointments(), loadFeedbackSummary(), loadPaymentMethods(), loadPaymentBillCount()]);subscribeRealtime();}
-document.getElementById('loginBtn').addEventListener('click',async()=>{const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value,status=document.getElementById('loginStatus');status.textContent='Signing in…';const {error}=await supabaseClient.auth.signInWithPassword({email,password});if(error){status.className='error';status.textContent=error.message;return;}await showDashboard();});
-document.getElementById('logoutBtn').addEventListener('click',async()=>{await supabaseClient.auth.signOut();location.reload();});
+const body=document.getElementById('applicationsBody'),mobileBox=document.getElementById('mobileApplications');let applications=[];let currentStaff=null;let staffMembers=[];
+async function checkSession(){
+  const {data}=await supabaseClient.auth.getSession();
+  const verifiedThisTab=sessionStorage.getItem('nebrinStaffAuthenticated')==='true';
+  if(data.session&&verifiedThisTab){
+    showDashboard();
+  }else{
+    if(data.session)await supabaseClient.auth.signOut();
+    loginPanel.classList.remove('hidden');
+    dashboardPanel.classList.add('hidden');
+  }
+}
+async function showDashboard(){
+  loginPanel.classList.add('hidden');
+  resetPanel.classList.add('hidden');
+  dashboardPanel.classList.remove('hidden');
+  await loadCurrentStaff();
+  await Promise.all([loadStaffMembers(),loadApplications(),loadServices(),loadAppointments(),loadFeedbackSummary(),loadPaymentMethods(),loadPaymentBillCount()]);
+  subscribeRealtime();
+}
+document.getElementById('loginBtn').addEventListener('click',async()=>{const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value,status=document.getElementById('loginStatus');status.textContent='Signing in…';const {error}=await supabaseClient.auth.signInWithPassword({email,password});if(error){status.className='error';status.textContent=error.message;return;}sessionStorage.setItem('nebrinStaffAuthenticated','true');await showDashboard();});
+document.getElementById('logoutBtn').addEventListener('click',async()=>{sessionStorage.removeItem('nebrinStaffAuthenticated');await supabaseClient.auth.signOut();location.reload();});
 document.getElementById('refreshBtn').addEventListener('click',loadApplications);
 document.getElementById('searchBox').addEventListener('input',render);
 document.getElementById('statusFilter').addEventListener('change',render);
+document.getElementById('departmentFilter')?.addEventListener('change',render);
+document.getElementById('assignmentFilter')?.addEventListener('change',render);
 document.getElementById('forgotPassword').addEventListener('click',()=>{loginPanel.classList.add('hidden');resetPanel.classList.remove('hidden');});
 document.getElementById('backToLogin').addEventListener('click',()=>{resetPanel.classList.add('hidden');loginPanel.classList.remove('hidden');});
 document.getElementById('sendResetBtn').addEventListener('click',async()=>{const email=document.getElementById('resetEmail').value.trim(),status=document.getElementById('resetStatus');if(!email){status.className='error';status.textContent='Enter your email.';return;}const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:`${window.location.origin}/admin.html`});if(error){status.className='error';status.textContent=error.message;return;}status.className='success';status.textContent='Password reset email sent.';});
-async function loadApplications(){const status=document.getElementById('dashboardStatus');status.textContent='Loading…';const {data,error}=await supabaseClient.from('applications').select('*').order('created_at',{ascending:false});if(error){status.className='error';status.textContent=error.message;return;}applications=data||[];status.textContent=`${applications.length} application(s)`;updateStats();render();}
+async function loadApplications(){
+  const status=document.getElementById('dashboardStatus');
+  status.textContent='Loading…';
+  const {data,error}=await supabaseClient.from('applications').select('*').is('deleted_at',null).order('created_at',{ascending:false});
+  if(error){status.className='error';status.textContent=error.message;return;}
+  applications=(data||[]).filter(a=>!a.archived_at);
+  status.textContent=`${applications.length} active application(s)`;
+  updateStats();
+  render();
+}
 function updateStats(){
   document.getElementById('statTotal').textContent=applications.length;
   document.getElementById('statNew').textContent=applications.filter(a=>a.status==='New').length;
@@ -28,7 +56,23 @@ function updateStats(){
   renderReportSummary();
 }
 function esc(v=''){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-function filteredRows(){const q=document.getElementById('searchBox').value.toLowerCase(),sf=document.getElementById('statusFilter').value;return applications.filter(a=>{const h=`${a.reference} ${a.full_name} ${a.phone} ${a.email} ${a.service}`.toLowerCase();return(!q||h.includes(q))&&(!sf||a.status===sf);});}
+function filteredRows(){
+  const q=document.getElementById('searchBox').value.toLowerCase();
+  const sf=document.getElementById('statusFilter').value;
+  const df=document.getElementById('departmentFilter')?.value||'';
+  const af=document.getElementById('assignmentFilter')?.value||'';
+
+  return applications.filter(a=>{
+    const haystack=`${a.reference} ${a.full_name} ${a.phone} ${a.email} ${a.service} ${a.department||''}`.toLowerCase();
+    const matchesSearch=!q||haystack.includes(q);
+    const matchesStatus=!sf||a.status===sf;
+    const matchesDepartment=!df||a.department===df;
+    const matchesAssignment=!af
+      ||(af==='mine'&&a.assigned_to===currentStaff?.user_id)
+      ||(af==='unassigned'&&!a.assigned_to);
+    return matchesSearch&&matchesStatus&&matchesDepartment&&matchesAssignment;
+  });
+}
 function documentsHtml(a) {
   const documents = Array.isArray(a.documents) ? a.documents : [];
   if (!documents.length) return '<span class="admin-detail">No documents</span>';
@@ -42,10 +86,12 @@ function render(){const r=filteredRows();body.innerHTML=r.map(a=>`<tr>
 <td><strong>${esc(a.reference)}</strong></td>
 <td>${esc(a.full_name)}<br>${esc(a.phone)}<br>${esc(a.email||'')}</td>
 <td>${esc(a.service)}${a.quoted_amount ? `<div class="fee-label">TZS ${Number(a.quoted_amount).toLocaleString()}</div><div class="admin-detail">Payment: ${esc(a.payment_status||'Pending')}</div>` : ''}</td>
+<td><span class="department-badge">${esc(a.department||'Unassigned')}</span></td>
+<td><span class="assignment-label">${esc(staffName(a.assigned_to))}</span></td>
 <td>${esc(a.message||'')}${a.admin_note ? `<div class="admin-note"><strong>Internal note:</strong> ${esc(a.admin_note)}</div>` : ''}${documentsHtml(a)}</td>
 <td><span class="badge">${esc(a.status)}</span></td>
 <td class="actions">
-<button onclick="setStatus('${a.id}','Processing')">Processing</button>
+<button onclick="setStatus('${a.id}','Processing')">Processing</button><button onclick="assignApplication('${a.id}')">Assign</button><button onclick="assignApplication('${a.id}')">Assign</button>
 <button onclick="setStatus('${a.id}','Completed')">Complete</button>
 <button onclick="setStatus('${a.id}','Rejected')">Reject</button>
 <button onclick="setFee('${a.id}', '${a.quoted_amount ?? ''}')">Set Fee</button><button onclick="setPaymentStatus('${a.id}','Confirmed')">Confirm Payment</button><button onclick="setPaymentStatus('${a.id}','Rejected')">Reject Payment</button>${a.payment_proof?.path?`<button onclick="openDocument('${encodeURIComponent(a.payment_proof.path)}')">View Payment Proof</button>`:''}
@@ -70,7 +116,9 @@ ${documentsHtml(a)}
 </div></article>`).join('');}
 
 window.setStatus=async function(id,status){
-  const {error}=await supabaseClient.from('applications').update({status}).eq('id',id);
+  const payload={status};
+  if(status==='Completed')payload.completed_at=new Date().toISOString();
+  const {error}=await supabaseClient.from('applications').update(payload).eq('id',id);
   if(error) alert(error.message); else loadApplications();
 };
 
@@ -327,7 +375,7 @@ window.deleteApplication=async function(id,reference){
  const app=applications.find(x=>x.id===id),docs=Array.isArray(app?.documents)?app.documents:[];
  for(const doc of docs){if(doc.path){const {error}=await supabaseClient.storage.from('application-documents').remove([doc.path]);if(error)console.warn(error.message);}}
  const {error}=await supabaseClient.from('applications').update({status:'Deleted',deletion_reason:reason.trim(),deleted_at:new Date().toISOString(),documents:[]}).eq('id',id);
- if(error){alert(error.message);return;}alert('Application deleted and customer message saved.');loadApplications();
+ if(error){alert(error.message);return;}applications=applications.filter(item=>item.id!==id);updateStats();render();alert('Application removed from the active dashboard.');
 };
 
 
@@ -519,6 +567,88 @@ document.getElementById('savePaymentMethodBtn')?.addEventListener('click',async(
 });
 
 document.getElementById('clearPaymentMethodBtn')?.addEventListener('click',clearPaymentMethodForm);
+
+
+function staffName(userId){
+  if(!userId)return 'Unassigned';
+  return staffMembers.find(member=>member.user_id===userId)?.full_name||'Assigned staff';
+}
+
+function roleDepartment(role){
+  const map={
+    'CEO':'Management','Super Admin':'Management','Manager':'Management',
+    'Accountant':'Finance','Finance':'Finance',
+    'Graphics':'Graphics','Graphic Designer':'Graphics',
+    'Customer Care':'Customer Care',
+    'HR':'Human Resources','Human Resources':'Human Resources',
+    'Digital Staff':'Digital Services','Staff':'Customer Care'
+  };
+  return map[role]||'Customer Care';
+}
+
+async function loadCurrentStaff(){
+  const {data:{user}}=await supabaseClient.auth.getUser();
+  if(!user)return;
+  const {data,error}=await supabaseClient.from('admin_users').select('*').eq('user_id',user.id).single();
+  if(error){alert('Your staff profile was not found. Ask the CEO to add your UUID to admin_users.');return;}
+  currentStaff=data;
+  document.getElementById('staffIdentity').innerHTML=
+    `${esc(data.full_name||user.email)} · <span class="role-badge">${esc(data.role||'Staff')}</span> · <span class="department-badge">${esc(data.department||roleDepartment(data.role))}</span>`;
+  document.getElementById('dashboardTitle').textContent=`${data.role||'Staff'} Dashboard`;
+  if(['CEO','Super Admin','Manager'].includes(data.role)){
+    document.getElementById('staffManagementPanel')?.classList.remove('hidden');
+  }else{
+    document.getElementById('staffManagementPanel')?.classList.add('hidden');
+    document.querySelector('.service-manager')?.classList.add('hidden');
+    document.querySelector('.payment-manager')?.classList.toggle('hidden',!['Accountant','Finance'].includes(data.role));
+  }
+}
+
+async function loadStaffMembers(){
+  const {data,error}=await supabaseClient.from('admin_users').select('*').eq('is_active',true).order('full_name');
+  if(error){console.error(error);return;}
+  staffMembers=data||[];
+  renderStaffMembers();
+}
+
+function renderStaffMembers(){
+  const box=document.getElementById('staffList');
+  if(!box)return;
+  box.innerHTML=staffMembers.map(member=>`<article class="staff-item">
+    <div><strong>${esc(member.full_name||'Unnamed staff')}</strong><br><small>${esc(member.user_id)}</small></div>
+    <select id="role-${member.user_id}">
+      ${['CEO','Manager','Accountant','Graphics','Customer Care','HR','Digital Staff','Staff'].map(role=>`<option ${member.role===role?'selected':''}>${role}</option>`).join('')}
+    </select>
+    <select id="dept-${member.user_id}">
+      ${['Management','Finance','Graphics','Customer Care','Human Resources','Digital Services'].map(dept=>`<option ${member.department===dept?'selected':''}>${dept}</option>`).join('')}
+    </select>
+    <button class="btn btn-primary" onclick="saveStaffRole('${member.user_id}')">Save</button>
+  </article>`).join('')||'<p>No staff profiles found.</p>';
+}
+
+window.saveStaffRole=async function(userId){
+  const role=document.getElementById(`role-${userId}`).value;
+  const department=document.getElementById(`dept-${userId}`).value;
+  const {error}=await supabaseClient.from('admin_users').update({role,department}).eq('user_id',userId);
+  if(error)alert(error.message);else{alert('Staff role updated.');loadStaffMembers();}
+};
+
+window.assignApplication=async function(id){
+  if(!['CEO','Super Admin','Manager'].includes(currentStaff?.role||'')){
+    alert('Only the CEO or Manager can assign applications.');
+    return;
+  }
+  const choices=staffMembers.map((member,index)=>`${index+1}. ${member.full_name} — ${member.role} / ${member.department}`).join('\n');
+  const answer=prompt(`Choose staff number:\n${choices}`);
+  if(answer===null)return;
+  const selected=staffMembers[Number(answer)-1];
+  if(!selected){alert('Invalid staff number.');return;}
+  const {error}=await supabaseClient.from('applications').update({
+    assigned_to:selected.user_id,
+    department:selected.department||roleDepartment(selected.role)
+  }).eq('id',id);
+  if(error)alert(error.message);else loadApplications();
+};
 
 checkSession();
 let appointments=[];

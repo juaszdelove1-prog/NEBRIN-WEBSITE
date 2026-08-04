@@ -32,10 +32,21 @@ table{width:100%;border-collapse:collapse;background:#fff}th,td{padding:12px;bor
 
 <section id="dashboardPanel" class="hidden">
 <div class="live-indicator"><span class="live-dot"></span>Live updates enabled</div><div class="admin-header">
-<div><p class="section-label">ADMIN DASHBOARD</p><h1>Customer Applications</h1></div>
+<div>
+      <p class="section-label">STAFF OPERATIONS DASHBOARD</p>
+      <h1 id="dashboardTitle">Customer Applications</h1>
+      <p id="staffIdentity" class="staff-identity">Loading staff profile…</p>
+    </div>
 <button id="logoutBtn" class="logout">Log Out</button>
 </div>
-<div class="dashboard-stats"><div class="stat-card"><span>Total</span><strong id="statTotal">0</strong></div><div class="stat-card orange"><span>New</span><strong id="statNew">0</strong></div><div class="stat-card"><span>Processing</span><strong id="statProcessing">0</strong></div><div class="stat-card"><span>Completed</span><strong id="statCompleted">0</strong></div></div><div class="service-manager">
+<div class="dashboard-stats"><div class="stat-card"><span>Total</span><strong id="statTotal">0</strong></div><div class="stat-card orange"><span>New</span><strong id="statNew">0</strong></div><div class="stat-card"><span>Processing</span><strong id="statProcessing">0</strong></div><div class="stat-card"><span>Completed</span><strong id="statCompleted">0</strong></div></div>
+<div id="staffManagementPanel" class="staff-management-panel hidden">
+  <h2>Staff Roles & Departments</h2>
+  <p>Create staff accounts first in Supabase Authentication, then manage their role and department here.</p>
+  <div id="staffList" class="staff-list"></div>
+</div>
+
+<div class="service-manager">
   <h2>Service Management</h2>
   <p>Add, edit, activate or deactivate services and define the documents customers must attach.</p>
 
@@ -160,12 +171,26 @@ TIN Certificate?"></textarea></label>
 <div class="toolbar">
 <input id="searchBox" type="search" placeholder="Search name, phone, reference…">
 <select id="statusFilter"><option value="">All statuses</option><option>New</option><option>Processing</option><option>Completed</option><option>Rejected</option><option>Deleted</option></select>
-<button id="refreshBtn" class="btn btn-primary">Refresh</button>
+<select id="departmentFilter">
+      <option value="">All departments</option>
+      <option>Management</option>
+      <option>Finance</option>
+      <option>Graphics</option>
+      <option>Customer Care</option>
+      <option>Human Resources</option>
+      <option>Digital Services</option>
+    </select>
+    <select id="assignmentFilter">
+      <option value="">All assignments</option>
+      <option value="mine">Assigned to me</option>
+      <option value="unassigned">Unassigned</option>
+    </select>
+    <button id="refreshBtn" class="btn btn-primary">Refresh</button>
 </div>
 <p id="dashboardStatus"></p>
 <div class="table-wrap">
 <table class="desktop-table">
-<thead><tr><th>Date</th><th>Reference</th><th>Customer</th><th>Service</th><th>Message</th><th>Status</th><th>Action</th></tr></thead>
+<thead><tr><th>Date</th><th>Reference</th><th>Customer</th><th>Service</th><th>Department</th><th>Assigned To</th><th>Message</th><th>Status</th><th>Action</th></tr></thead>
 <tbody id="applicationsBody"></tbody>
 </table>
 </div><div id="mobileApplications"></div>
