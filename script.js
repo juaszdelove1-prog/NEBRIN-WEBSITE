@@ -381,3 +381,36 @@ async function loadPublicPaymentMethods(){
 }
 
 loadPublicPaymentMethods();
+
+
+// V21: service advertisements lead directly to the application form.
+document.querySelectorAll('.service-request-btn').forEach(button=>{
+  button.addEventListener('click',()=>{
+    const requestedService=button.dataset.service||'';
+    const select=document.getElementById('serviceSelect');
+
+    const chooseService=()=>{
+      if(!select)return;
+      const exact=[...select.options].find(option=>
+        option.value.toLowerCase()===requestedService.toLowerCase()
+      );
+      const close=[...select.options].find(option=>
+        option.value.toLowerCase().includes(requestedService.toLowerCase()) ||
+        requestedService.toLowerCase().includes(option.value.toLowerCase())
+      );
+      const option=exact||close;
+      if(option){
+        select.value=option.value;
+        select.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      document.getElementById('apply')?.scrollIntoView({behavior:'smooth',block:'start'});
+      setTimeout(()=>select?.focus(),650);
+    };
+
+    if(select && select.options.length>1){
+      chooseService();
+    }else{
+      setTimeout(chooseService,1000);
+    }
+  });
+});

@@ -1,7 +1,7 @@
 {
   "name": "NEBRIN Online Service Company Limited",
   "short_name": "NEBRIN",
-  "description": "Digital services, business support, government service assistance and youth empowerment.",
+  "description": "Business, education, digital and government-service support from NEBRIN.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#061b46",

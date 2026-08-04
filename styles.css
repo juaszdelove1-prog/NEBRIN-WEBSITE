@@ -328,3 +328,144 @@ html[dir="rtl"] .application-form label,html[dir="rtl"] .track-card{text-align:r
 .bill-whatsapp{background:#16a34a;color:#fff}
 .bill-email{background:#0a2b63;color:#fff}
 @media(max-width:700px){.bill-grid{grid-template-columns:1fr}}
+
+
+/* =========================================================
+   NEBRIN V21 — CLEAR CUSTOMER JOURNEY
+   ========================================================= */
+.v21-home{background:#fff;color:#10213f}
+.v21-header{background:rgba(255,255,255,.97);border-bottom:1px solid #e9eef6}
+.v21-header .main-nav{gap:18px}
+.v21-header .main-nav a{font-size:14px}
+
+.v21-hero{
+  position:relative;
+  overflow:hidden;
+  padding:96px 0 82px;
+  background:
+    radial-gradient(circle at 85% 10%,rgba(255,106,0,.16),transparent 28%),
+    linear-gradient(135deg,#061b46 0%,#0b3470 58%,#104683 100%);
+  color:#fff
+}
+.v21-hero::after{
+  content:"";position:absolute;inset:auto -140px -230px auto;width:520px;height:520px;
+  border-radius:50%;border:90px solid rgba(255,255,255,.045)
+}
+.v21-hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.2fr .8fr;gap:60px;align-items:center}
+.v21-hero-copy{max-width:760px}
+.v21-hero .eyebrow{font-size:.78rem;letter-spacing:.19em;color:#ff9b52;font-weight:800;margin:0 0 18px}
+.v21-hero h1{
+  margin:0;max-width:760px;font-family:Montserrat,Inter,sans-serif;
+  font-size:clamp(2.65rem,5vw,4.75rem);line-height:1.02;letter-spacing:-.045em
+}
+.v21-hero .hero-text{font-size:1.08rem;line-height:1.75;max-width:680px;color:#dbe9ff;margin:22px 0 28px}
+.v21-trust-row{display:flex;gap:18px;flex-wrap:wrap;margin-top:30px;color:#dbe9ff;font-size:.9rem}
+.v21-hero-panel{
+  background:rgba(255,255,255,.98);color:#10213f;border-radius:24px;padding:30px;
+  box-shadow:0 26px 70px rgba(0,0,0,.25)
+}
+.v21-hero-panel h2{font-size:1.7rem;margin:4px 0 18px}
+.v21-hero-panel>a{
+  display:flex;justify-content:space-between;gap:12px;padding:15px 0;
+  border-bottom:1px solid #e8edf5;color:#10213f;font-weight:700
+}
+.v21-hero-panel>a:last-child{border-bottom:0}
+.v21-hero-panel>a span{color:#ff6a00}
+
+.v21-section-intro{max-width:720px;margin-bottom:34px}
+.v21-section-intro.centered{text-align:center;margin-left:auto;margin-right:auto}
+.v21-section-intro h2{font-size:clamp(2rem,3vw,3rem);line-height:1.12;margin:5px 0 12px}
+.v21-section-intro>p:last-child{font-size:1.02rem;line-height:1.7;color:#5a6880}
+
+.v21-category-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.v21-category-card{
+  position:relative;display:flex;flex-direction:column;min-height:480px;
+  border:1px solid #e4eaf3;border-radius:22px;padding:28px;background:#fff;
+  box-shadow:0 15px 40px rgba(6,27,70,.07);overflow:hidden
+}
+.v21-category-card::before{content:"";position:absolute;left:0;right:0;top:0;height:5px}
+.category-business::before{background:#ff6a00}
+.category-education::before{background:#1d8d58}
+.category-digital::before{background:#174ba8}
+.v21-category-icon{
+  width:48px;height:48px;display:grid;place-items:center;border-radius:14px;
+  background:#061b46;color:#fff;font-size:1.25rem;font-weight:800;margin-bottom:22px
+}
+.v21-category-card h3{font-size:1.45rem;line-height:1.3;margin:4px 0 14px}
+.v21-category-card ul{padding-left:20px;color:#52617a;line-height:1.7;margin:0 0 24px}
+.v21-category-card .btn{margin-top:auto;width:100%}
+
+.v21-featured-services{margin-top:34px;padding:26px;border-radius:20px;background:#f4f7fb}
+.v21-featured-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:18px}
+.v21-featured-heading h3{margin:0;font-size:1.35rem}
+.v21-featured-heading p{margin:0;color:#66758e}
+.v21-service-chips{display:flex;gap:10px;flex-wrap:wrap}
+.v21-service-chips button{
+  border:1px solid #dce4ef;background:#fff;border-radius:999px;padding:11px 16px;
+  color:#17315d;font-weight:700;cursor:pointer;transition:.2s
+}
+.v21-service-chips button:hover{border-color:#ff6a00;color:#ff6a00;transform:translateY(-1px)}
+
+.v21-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.v21-steps article{background:#fff;border:1px solid #e4eaf3;border-radius:18px;padding:26px}
+.v21-steps article>span{
+  width:42px;height:42px;display:grid;place-items:center;border-radius:50%;
+  background:#ff6a00;color:#fff;font-weight:800;margin-bottom:18px
+}
+.v21-steps h3{margin:0 0 8px}
+.v21-steps p{margin:0;color:#5a6880;line-height:1.65}
+
+.v21-form-shell{
+  display:grid;grid-template-columns:.68fr 1.32fr;gap:28px;align-items:start;
+  background:#f5f8fc;border:1px solid #e5ebf4;border-radius:26px;padding:26px
+}
+.v21-form-help{position:sticky;top:100px;padding:24px}
+.v21-form-help h3{font-size:1.45rem;margin:0 0 18px}
+.v21-form-help ul{padding-left:20px;line-height:1.8;color:#52617a}
+.v21-help-contact{display:grid;gap:9px;margin-top:25px;padding:20px;border-radius:16px;background:#061b46;color:#fff}
+.v21-help-contact a{color:#fff}
+.v21-application-form{margin:0;background:#fff;border-radius:20px;padding:26px;box-shadow:none}
+
+.v21-payments .public-payment-methods{margin-top:26px}
+.v21-payment-note{
+  margin-top:24px;padding:18px 20px;border-radius:14px;background:#fff3e8;
+  border:1px solid #ffd8b8;line-height:1.65
+}
+.v21-payment-note a{display:block;margin-top:8px;font-weight:800;color:#d65300}
+
+.v21-appointment{background:#fff}
+.v21-appointment .appointment-form{border:1px solid #e5ebf4;border-radius:22px;padding:28px;background:#f8faff}
+
+.v21-contact{background:#061b46;color:#fff}
+.v21-contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center}
+.v21-contact h2{font-size:2.5rem;margin:5px 0 10px}
+.v21-contact p{color:#c9d9f1}
+.v21-contact-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.v21-contact-actions a{
+  padding:15px;border:1px solid rgba(255,255,255,.18);border-radius:12px;
+  color:#fff;font-weight:700;background:rgba(255,255,255,.06)
+}
+.v21-footer{background:#03112d}
+.v21-footer .footer-grid{align-items:center}
+.v21-footer .footer-grid>div:nth-child(2){display:flex;gap:15px;flex-wrap:wrap}
+
+@media(max-width:980px){
+  .v21-hero-grid,.v21-form-shell,.v21-contact-grid{grid-template-columns:1fr}
+  .v21-hero-panel{max-width:620px}
+  .v21-category-grid{grid-template-columns:1fr}
+  .v21-category-card{min-height:auto}
+  .v21-form-help{position:static}
+}
+@media(max-width:720px){
+  .v21-hero{padding:64px 0 54px}
+  .v21-hero h1{font-size:clamp(2.25rem,11vw,3.25rem);line-height:1.06}
+  .v21-hero .hero-text{font-size:1rem}
+  .v21-trust-row{display:grid;gap:8px}
+  .v21-featured-heading{display:block}
+  .v21-featured-heading p{margin-top:7px}
+  .v21-steps{grid-template-columns:1fr}
+  .v21-form-shell{padding:12px}
+  .v21-application-form{padding:18px}
+  .v21-contact-actions{grid-template-columns:1fr}
+  .v21-contact h2{font-size:2rem}
+}
