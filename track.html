@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Track Application | NEBRIN</title><link rel="stylesheet" href="styles.css"></head>
+<body><header class="site-header"><div class="container nav-wrap">
+<a class="brand" href="index.html"><span class="brand-mark"><span class="brand-orbit"></span><span class="brand-globe">N</span></span>
+<span class="brand-copy"><strong>NEBRIN</strong><small>ONLINE SERVICE COMPANY LIMITED</small></span></a>
+
+      <div class="language-control">
+        <label for="languageSelector">Language</label>
+        <select id="languageSelector" aria-label="Choose language">
+          <option value="en">English</option>
+          <option value="sw">Kiswahili</option>
+          <option value="fr">Français</option>
+          <option value="pt">Português</option>
+          <option value="ar">العربية</option>
+        </select>
+      </div>
+
+<a class="btn btn-primary" href="index.html#apply">Apply for a Service</a></div></header>
+<main class="track-shell"><div class="container"><section class="track-card">
+<p class="section-label">APPLICATION TRACKING</p><h1>Check your application status</h1>
+<p>Enter your reference number and the same phone number used during submission.</p>
+<div class="track-form"><input id="trackReference" placeholder="Reference e.g. NEB-20260802-ABC123">
+<input id="trackPhone" placeholder="Phone number"><button id="trackBtn" class="btn btn-primary full">Check Status</button></div>
+<div id="trackStatus" class="form-status full" aria-live="polite"></div><div id="trackResult" class="track-result"></div>
+<div id="feedbackBox" class="feedback-box hidden">
+  <h3>Rate Your Experience</h3><p>This form appears after your application is completed.</p>
+  <div id="ratingStars" class="rating-stars"><button type="button" data-rating="1">★</button><button type="button" data-rating="2">★</button><button type="button" data-rating="3">★</button><button type="button" data-rating="4">★</button><button type="button" data-rating="5">★</button></div>
+  <textarea id="feedbackComment" rows="4" placeholder="Tell us about your experience"></textarea>
+  <button id="submitFeedbackBtn" class="btn btn-primary" type="button">Submit Feedback</button>
+  <div id="feedbackStatus" class="form-status"></div>
+</div>
+<div id="paymentRequestBox" class="payment-request-box hidden">
+  <h3>Request Payment Details</h3>
+  <p>Select the mobile network or bank you want to use. The system will prepare the full payment bill automatically.</p>
+
+  <label>
+    Payment Provider
+    <select id="paymentProviderSelector">
+      <option value="">Choose mobile network or bank</option>
+    </select>
+  </label>
+
+  <button id="generatePaymentBillBtn" class="btn btn-primary" type="button">Generate Payment Bill</button>
+
+  <div id="paymentBillResult" class="payment-bill-result hidden"></div>
+  <div id="paymentRequestStatus" class="form-status"></div>
+</div>
+
+<div id="paymentUploadBox" class="payment-box hidden"><h3>Submit Payment Proof</h3><p>Upload PDF, JPG or PNG after paying the quoted amount.</p><div class="payment-upload-controls"><input id="paymentProofFile" type="file" accept=".pdf,.jpg,.jpeg,.png"><button id="uploadPaymentProofBtn" class="btn btn-primary" type="button">Upload Payment Proof</button></div><div id="paymentUploadStatus" class="form-status"></div></div>
+</section></div></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script><script src="i18n.js"></script><script src="track.js"></script></body></html>
