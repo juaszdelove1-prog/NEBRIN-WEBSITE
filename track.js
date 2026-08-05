@@ -22,7 +22,7 @@ btn.addEventListener('click',async()=>{
    show('Appointment booking found.','success');
    resultBox.innerHTML=`<article class="track-result-card">
      <div class="track-result-grid">
-       <div><small>Booking Reference</small><strong>${esc(booking.reference)}</strong></div>
+       <div><small>Booking Reference</small><strong>${esc(booking.reference)}</strong></div><div><small>Service Number</small><strong>${esc(booking.service_number||booking.reference)}</strong></div>
        <div><small>Status</small><span class="status-pill">${esc(booking.status)}</span></div>
        <div><small>Office</small><strong>${esc(booking.office)}</strong></div>
        <div><small>Date</small><strong>${esc(booking.appointment_date)}</strong></div>
@@ -31,7 +31,7 @@ btn.addEventListener('click',async()=>{
      </div>
      <p style="margin-top:16px"><strong>Customer:</strong> ${esc(booking.full_name)}</p>
      <p><strong>Purpose:</strong> ${esc(booking.purpose)}</p>
-     ${booking.admin_note?`<div class="admin-note"><strong>Office message:</strong> ${esc(booking.admin_note)}</div>`:''}
+     ${booking.admin_note?`<div class="admin-note"><strong>Office message:</strong> ${esc(booking.admin_note)}</div>`:''}<div class="booking-instruction">Present this receipt and service number to the office secretary.</div><button class="print-btn" onclick="window.print()">Print / Save Booking Receipt</button>
    </article>`;
    return;
  }
