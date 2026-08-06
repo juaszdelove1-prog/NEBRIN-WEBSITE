@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEBRIN Staff Log Book</title><link rel="stylesheet" href="styles.css"></head>
+<body class="attendance-page"><header class="site-header"><div class="container nav-wrap">
+<a class="brand" href="index.html"><span class="brand-mark"><span class="brand-orbit"></span><span class="brand-globe">N</span></span><span class="brand-copy"><strong>NEBRIN</strong><small>ONLINE SERVICE COMPANY LIMITED</small></span></a>
+<div class="admin-header-actions"><a class="btn btn-secondary-admin" href="admin.html">Dashboard</a><a id="ceoLink" class="btn btn-primary hidden" href="ceo.html">CEO Control Centre</a></div>
+</div></header><main class="container attendance-shell">
+<section id="attendanceAccess" class="dashboard-card">Checking staff access…</section>
+<section id="attendanceWorkspace" class="hidden">
+<div class="v21-section-intro"><p class="section-label">DAILY STAFF LOG BOOK</p><h1>Morning attendance and staff presence</h1><p>Check in when you arrive and check out when you leave. The system records time, login activity and attendance status.</p></div>
+<div class="attendance-grid">
+<article class="dashboard-card attendance-action-card"><h2 id="welcomeStaff">Welcome</h2><div id="todaySchedule" class="schedule-box"></div><div id="todayAttendance"></div><div class="attendance-actions"><button id="checkInBtn" class="btn btn-primary">Check In</button><button id="checkOutBtn" class="btn btn-secondary-admin">Check Out</button></div><p id="attendanceStatus"></p></article>
+<article class="dashboard-card"><h2>My recent log book</h2><div id="myAttendanceHistory"></div></article>
+</div></section></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script src="attendance.js"></script></body></html>
