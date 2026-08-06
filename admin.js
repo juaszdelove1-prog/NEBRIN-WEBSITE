@@ -15,7 +15,7 @@ async function showDashboard(){
   loginPanel.classList.add('hidden');
   resetPanel.classList.add('hidden');
   dashboardPanel.classList.remove('hidden');
-  await loadCurrentStaff();
+  await loadCurrentStaff();await startStaffSession('admin');
   await Promise.all([loadStaffMembers(),loadPendingStaff(),loadApplications(),loadServices(),loadAppointments(),loadFeedbackSummary(),loadPaymentMethods(),loadPaymentBillCount()]);
   subscribeRealtime();
 }
@@ -569,6 +569,13 @@ document.getElementById('savePaymentMethodBtn')?.addEventListener('click',async(
 document.getElementById('clearPaymentMethodBtn')?.addEventListener('click',clearPaymentMethodForm);
 
 
+
+let staffHeartbeatTimer=null;
+async function startStaffSession(page){
+ try{await supabaseClient.rpc('record_staff_login',{p_page:page});await supabaseClient.rpc('record_staff_activity',{p_action:'Opened dashboard',p_page:page,p_details:{path:location.pathname}});
+ if(staffHeartbeatTimer)clearInterval(staffHeartbeatTimer);staffHeartbeatTimer=setInterval(()=>supabaseClient.rpc('staff_session_heartbeat',{p_page:page}),120000);}catch(error){console.warn('Staff tracking:',error.message);}
+}
+
 function staffName(userId){
   if(!userId)return 'Unassigned';
   return staffMembers.find(member=>member.user_id===userId)?.full_name||'Assigned staff';
@@ -594,7 +601,7 @@ async function loadCurrentStaff(){
   currentStaff=data;
   document.getElementById('staffIdentity').innerHTML=
     `${esc(data.full_name||user.email)} · <span class="role-badge">${esc(data.role||'Staff')}</span> · <span class="department-badge">${esc(data.department||roleDepartment(data.role))}</span>`;
-  document.getElementById('dashboardTitle').textContent=`${data.role||'Staff'} Dashboard`;
+  document.getElementById('dashboardTitle').textContent=`${data.role||'Staff'} Dashboard`;if(['CEO','Super Admin'].includes(data.role))document.getElementById('ceoDashboardLink')?.classList.remove('hidden');
   if(['CEO','Super Admin','Manager'].includes(data.role)){
     document.getElementById('staffManagementPanel')?.classList.remove('hidden');document.getElementById('staffInvitePanel')?.classList.remove('hidden');
   }else{
