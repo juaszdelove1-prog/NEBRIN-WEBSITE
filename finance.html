@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEBRIN Finance Dashboard</title><link rel="stylesheet" href="styles.css"></head>
+<body class="role-dashboard-page"><header class="site-header"><div class="container nav-wrap">
+<a class="brand" href="index.html"><span class="brand-mark"><span class="brand-orbit"></span><span class="brand-globe">N</span></span>
+<span class="brand-copy"><strong>NEBRIN</strong><small>FINANCE & ACCOUNTS</small></span></a>
+<div class="admin-header-actions"><a class="btn btn-secondary-admin" href="admin.html">Operations</a><a class="btn btn-primary" href="attendance.html">Log Book</a></div>
+</div></header>
+<main class="container role-dashboard-shell"><section id="roleAccess" class="dashboard-card">Checking access…</section><section id="roleWorkspace" class="hidden">
+<div class="v21-section-intro"><p class="section-label">FINANCE</p><h1>Finance Dashboard</h1><p>Review service fees, submitted payment proofs, confirmed payments and revenue.</p></div>
+<div class="dashboard-stats"><div class="stat-card"><span>Pending Payments</span><strong id="financePending">0</strong></div><div class="stat-card"><span>Proof Submitted</span><strong id="financeSubmitted">0</strong></div><div class="stat-card"><span>Confirmed</span><strong id="financeConfirmed">0</strong></div><div class="stat-card"><span>Revenue</span><strong id="financeRevenue">0</strong></div></div><div class="executive-grid"><article class="dashboard-card"><h2>Payment Applications</h2><div id="financeApplications"></div></article><article class="dashboard-card"><h2>Payment Methods</h2><div id="financeMethods"></div></article></div>
+</section></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script src="finance.js"></script></body></html>

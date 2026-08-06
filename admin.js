@@ -602,6 +602,12 @@ async function loadCurrentStaff(){
   document.getElementById('staffIdentity').innerHTML=
     `${esc(data.full_name||user.email)} · <span class="role-badge">${esc(data.role||'Staff')}</span> · <span class="department-badge">${esc(data.department||roleDepartment(data.role))}</span>`;
   document.getElementById('dashboardTitle').textContent=`${data.role||'Staff'} Dashboard`;
+  const myBtn=document.getElementById('myRoleDashboardBtn');
+  if(myBtn && window.NEBRIN_ROLE_DASHBOARD?.[data.role]){
+    myBtn.classList.remove('hidden');
+    myBtn.onclick=()=>window.nebrinOpenRoleDashboard(data.role);
+  }
+
   document.getElementById('managerDashboardLink')?.classList.toggle('hidden',!['CEO','Super Admin','Manager'].includes(data.role));
   document.getElementById('customerCareDashboardLink')?.classList.toggle('hidden',!['CEO','Super Admin','Manager','Customer Care'].includes(data.role));
 if(['CEO','Super Admin'].includes(data.role))document.getElementById('ceoDashboardLink')?.classList.remove('hidden');
