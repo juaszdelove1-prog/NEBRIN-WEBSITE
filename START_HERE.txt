@@ -1,0 +1,29 @@
+NEBRIN ENTERPRISE PRODUCTION FINAL
+=================================
+
+SUPABASE
+Use only ONE of these SQL files because they contain the same SQL:
+- supabase-setup.sql
+- V20_COMPLETE_FINAL_MIGRATION.sql
+
+Recommended: use supabase-setup.sql.
+
+Do not run both.
+
+GITHUB
+Upload:
+- HTML files
+- JavaScript files
+- styles.css
+- manifest.webmanifest
+- robots.txt
+- sitemap.xml
+- sw.js
+- vercel.json
+
+Do not upload:
+- SQL files
+- README files
+- Deployment guide files
+
+Payment details are already included in the SQL setup.
