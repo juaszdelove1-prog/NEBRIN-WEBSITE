@@ -601,7 +601,10 @@ async function loadCurrentStaff(){
   currentStaff=data;
   document.getElementById('staffIdentity').innerHTML=
     `${esc(data.full_name||user.email)} · <span class="role-badge">${esc(data.role||'Staff')}</span> · <span class="department-badge">${esc(data.department||roleDepartment(data.role))}</span>`;
-  document.getElementById('dashboardTitle').textContent=`${data.role||'Staff'} Dashboard`;if(['CEO','Super Admin'].includes(data.role))document.getElementById('ceoDashboardLink')?.classList.remove('hidden');
+  document.getElementById('dashboardTitle').textContent=`${data.role||'Staff'} Dashboard`;
+  document.getElementById('managerDashboardLink')?.classList.toggle('hidden',!['CEO','Super Admin','Manager'].includes(data.role));
+  document.getElementById('customerCareDashboardLink')?.classList.toggle('hidden',!['CEO','Super Admin','Manager','Customer Care'].includes(data.role));
+if(['CEO','Super Admin'].includes(data.role))document.getElementById('ceoDashboardLink')?.classList.remove('hidden');
   if(['CEO','Super Admin','Manager'].includes(data.role)){
     document.getElementById('staffManagementPanel')?.classList.remove('hidden');document.getElementById('staffInvitePanel')?.classList.remove('hidden');
   }else{
