@@ -10,3 +10,12 @@ window.nebrinOpenRoleDashboard=function(role){
  const target=window.NEBRIN_ROLE_DASHBOARD[role]||'admin.html';
  location.href=target;
 };
+Object.assign(window.NEBRIN_ROLE_DASHBOARD,{
+'Secretary':'secretary.html','Customer Care':'customer-care-dashboard.html',
+'Registry Officer':'registry.html','Records Officer':'registry.html',
+'Business Officer':'business.html','Business Manager':'business.html',
+'Legal Officer':'legal.html','Legal Counsel':'legal.html',
+'Sales Field Manager':'sales-field.html','Field Supervisor':'sales-field.html','Team Leader':'sales-field.html',
+'Lipa Agent':'sales-field.html','SIM Registration Agent':'sales-field.html','Field Officer':'sales-field.html',
+'Registration Officer':'registration.html'
+});

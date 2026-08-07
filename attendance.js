@@ -12,7 +12,7 @@ async function initAttendance(){
  document.getElementById('welcomeStaff').textContent=`Welcome, ${data.full_name}`;
  if(['CEO','Super Admin'].includes(data.role))document.getElementById('ceoLink').classList.remove('hidden');
  await supabaseClient.rpc('record_staff_login',{p_page:'attendance'});
- await Promise.all([loadToday(),loadHistory()]);
+ await Promise.all([loadToday(),loadHistory(),loadBreak()]);
 }
 async function loadToday(){
  const {data,error}=await supabaseClient.rpc('get_my_attendance_today');
@@ -34,8 +34,18 @@ async function mark(action){
  const button=document.getElementById(action==='in'?'checkInBtn':'checkOutBtn');button.disabled=true;
  const {error}=await supabaseClient.rpc(action==='in'?'staff_check_in':'staff_check_out',{p_source:'Web Log Book'});
  document.getElementById('attendanceStatus').textContent=error?error.message:(action==='in'?'Check-in recorded.':'Check-out recorded.');
- await Promise.all([loadToday(),loadHistory()]);
+ await Promise.all([loadToday(),loadHistory(),loadBreak()]);
 }
 document.getElementById('checkInBtn').addEventListener('click',()=>mark('in'));
 document.getElementById('checkOutBtn').addEventListener('click',()=>mark('out'));
 initAttendance();
+async function loadBreak(){
+ const {data,error}=await supabaseClient.rpc('get_my_current_break');
+ const row=Array.isArray(data)?data[0]:data;
+ const on=!!row?.break_id;
+ document.getElementById('startBreakBtn').disabled=on;
+ document.getElementById('returnBreakBtn').disabled=!on;
+ document.getElementById('breakStatus').innerHTML=on?`<div class="expiry-note"><strong>${esc(row.break_type)}</strong> started ${fmt(row.started_at)}. Allowed: ${row.allowed_minutes} minutes.</div>`:'';
+}
+document.getElementById('startBreakBtn').addEventListener('click',async()=>{const type=prompt('Break type: Tea Break or Lunch Break','Tea Break');if(!type)return;const {error}=await supabaseClient.rpc('start_staff_break',{p_break_type:type});attendanceStatus.textContent=error?error.message:'Break started. Return within 30 minutes.';loadBreak();});
+document.getElementById('returnBreakBtn').addEventListener('click',async()=>{const {error}=await supabaseClient.rpc('end_staff_break');attendanceStatus.textContent=error?error.message:'Welcome back. Break ended.';loadBreak();});

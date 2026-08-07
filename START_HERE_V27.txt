@@ -1,0 +1,109 @@
+NEBRIN ENTERPRISE V27 — PRODUCTION SECURE DIGITAL OFFICE
+=========================================================
+
+THIS REPLACES V26. DO NOT DEPLOY V26.
+
+V27 is built on the V25 database you already have. It contains the complete V26
+Digital Office migration plus V27 production-security hardening in ONE SQL file.
+
+STEP 1 — SUPABASE
+-----------------
+Open Supabase > SQL Editor > New Query.
+Run ONLY:
+SUPABASE/V27_COMPLETE_PRODUCTION_DATABASE.sql
+
+Expected result:
+Success. No rows returned.
+
+If Supabase shows an error, DO NOT continue to GitHub until the SQL error is fixed.
+
+STEP 2 — GITHUB
+---------------
+Upload/replace EVERY file inside GITHUB_UPLOAD to the repository root in ONE commit.
+
+Commit:
+Deploy NEBRIN Enterprise V27 Production Secure Digital Office
+
+Do not upload SUPABASE, INSTRUCTIONS or PRODUCTION_TESTS folders into the public
+website root.
+
+STEP 3 — VERCEL
+---------------
+Wait until the Production deployment is Ready.
+Do not create repeated test commits.
+
+STEP 4 — FIRST PRODUCTION LOGIN
+-------------------------------
+1. Sign in as CEO.
+2. Open /mfa.html and enroll an authenticator.
+3. Open /system-health.html.
+4. Test CEO, Manager, Secretary, HR, Customer Care, Finance, Legal, Business,
+   Registry, Sales Field and Registration dashboards.
+5. Test a new staff invitation: Pending -> Approval -> Role dashboard.
+
+STEP 5 — CUSTOMER JOURNEY
+-------------------------
+Test with a new sample customer:
+Public Website -> Digital Office Reception -> Secretary -> Department ->
+Processing -> Completion -> Registry/Archive.
+
+Also test:
+- Customer Care message
+- Urgent/Emergency routing
+- Booking and tracking
+- Online Store order
+- Office closed message outside 08:30–18:30
+- 30-minute staff break
+- Staff attendance/check-out
+- Electronic correspondence
+- Field customer assignment
+- Staff Room / Leave request
+
+SECURITY INCLUDED
+-----------------
+- Least-privilege RLS for sensitive operational tables
+- Department/assignee scoping
+- HR/employee-document restrictions
+- Finance/Business store-order restrictions
+- Registry/correspondence access control
+- Append-only security audit log
+- Critical-change audit triggers
+- Privileged role-change guard
+- Optional MFA enforcement support
+- 30-minute idle session timeout on internal pages
+- After-hours staff access control
+- Vercel security headers / CSP / clickjacking protection
+- No secret/service-role credentials in GitHub
+- Private employee-document storage controls
+- Production System Health dashboard
+- SEO sitemap/robots/Organization structured data
+
+GOOGLE SEARCH
+-------------
+V27 prepares the site correctly for Google, but Google Search itself is not controlled
+by Vercel or the website.
+
+After Vercel is Ready:
+1. Verify https://www.nebrinonlineonesignal.com in Google Search Console.
+2. Submit https://www.nebrinonlineonesignal.com/sitemap.xml.
+3. Use URL Inspection for https://www.nebrinonlineonesignal.com/ and request indexing.
+
+Google decides crawl/index timing, so no one can guarantee immediate search ranking.
+
+EMAIL / WHATSAPP / OCR
+----------------------
+Email SMTP secrets are already compatible with the included Edge Function example,
+but the Edge Function still has to be deployed in Supabase before automatic delivery.
+
+WhatsApp automation requires an official Meta WhatsApp Cloud API or Twilio account,
+sender approval and templates.
+
+OCR certificate verification requires an OCR/Document AI provider. V27 keeps the
+verification queue and secure document controls ready for that provider.
+
+FINAL SAFETY NOTE
+-----------------
+No software can truthfully be guaranteed 100% immune from outages, attacks or bugs.
+V27 is therefore packaged as the production-secure release, with static QA already
+passed, but the live database and real user journeys must still pass the included
+production acceptance checklist before inviting major customers.
