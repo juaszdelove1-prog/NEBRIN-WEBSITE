@@ -532,3 +532,31 @@ html[dir="rtl"] .application-form label,html[dir="rtl"] .track-card{text-align:r
 .neb-hidden{display:none!important}
 @media(max-width:1100px){.neb-status-grid{grid-template-columns:repeat(3,1fr)}.neb-grid-3{grid-template-columns:1fr 1fr}.neb-lounge-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:720px){.neb-status-grid,.neb-grid-2,.neb-grid-3,.neb-form,.neb-system-health{grid-template-columns:1fr}.neb-form .full{grid-column:auto}.neb-lounge-grid{grid-template-columns:1fr}.neb-shell{width:94%;margin-top:18px}}
+
+/* ===== V27 Post-Audit Professional UI ===== */
+.neb-toast-host{position:fixed;right:22px;top:22px;z-index:99999;display:grid;gap:10px;max-width:min(380px,88vw)}
+.neb-toast{background:#061b46;color:#fff;border-radius:12px;padding:13px 16px;box-shadow:0 16px 40px #061b4640;font-weight:700}
+.neb-toast.error{background:#a91d2b}.neb-toast.success{background:#116b3b}
+.neb-modal-backdrop{position:fixed;inset:0;background:#061b4699;backdrop-filter:blur(4px);display:grid;place-items:center;padding:18px;z-index:99990}
+.neb-modal{width:min(820px,96vw);max-height:92vh;overflow:auto;background:#fff;border-radius:22px;box-shadow:0 28px 80px #0005}
+.neb-modal>header{display:flex;justify-content:space-between;gap:15px;padding:22px 24px;border-bottom:1px solid #e6ebf2;position:sticky;top:0;background:#fff;z-index:2}
+.neb-modal h2{margin:0;color:#061b46}.neb-modal header p{margin:5px 0 0;color:#667085}.neb-modal-close{border:0;background:#f0f3f8;width:38px;height:38px;border-radius:50%;font-size:25px;cursor:pointer}
+.neb-modal-form{padding:22px 24px}.neb-modal-form footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;border-top:1px solid #edf0f5;padding-top:18px}
+.neb-pro-shell{display:grid;grid-template-columns:238px minmax(0,1fr);min-height:100vh;background:#f4f7fb}
+.neb-pro-side{background:#061b46;color:#fff;padding:22px 15px;position:sticky;top:0;height:100vh;overflow:auto}
+.neb-pro-side .brand-mini{padding:8px 10px 22px;font-weight:950;font-size:20px}.neb-pro-side .brand-mini small{display:block;font-size:10px;color:#b9c8df;margin-top:4px;letter-spacing:.08em}
+.neb-pro-nav{display:grid;gap:5px}.neb-pro-nav a,.neb-pro-nav button{border:0;text-align:left;background:transparent;color:#dbe5f4;padding:11px 12px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
+.neb-pro-nav a:hover,.neb-pro-nav button:hover,.neb-pro-nav .active{background:#ffffff16;color:#fff}
+.neb-pro-main{min-width:0;padding:24px 28px 60px}
+.neb-pro-top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}.neb-pro-top h1{margin:0;color:#061b46;font-size:clamp(24px,3vw,36px)}
+.neb-pro-top p{margin:4px 0;color:#667085}.neb-pro-actions{display:flex;gap:8px;flex-wrap:wrap}
+.neb-pro-kpis{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:12px;margin:18px 0}.neb-pro-kpi{background:#fff;border:1px solid #e4eaf3;border-radius:15px;padding:14px;box-shadow:0 7px 22px #061b460b}
+.neb-pro-kpi span{display:block;font-size:11px;font-weight:850;color:#667085;text-transform:uppercase}.neb-pro-kpi strong{font-size:24px;color:#061b46}
+.neb-corporate-tools{margin-top:24px;border:1px solid #e0e6ef;border-radius:16px;background:#fff}.neb-corporate-tools>summary{cursor:pointer;padding:16px 18px;font-weight:900;color:#061b46}.neb-corporate-tools .corp-content{padding:0 18px 18px}
+.neb-module-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 18px}.neb-module-toolbar button,.neb-module-toolbar a{border-radius:10px}
+.neb-control-wall{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.neb-monitor{background:#06152f;color:#dbe8ff;border:1px solid #173862;border-radius:14px;padding:15px;min-height:105px}.neb-monitor strong{display:block;font-size:20px;color:#fff}.neb-monitor .online{color:#67e69a}.neb-monitor .warning{color:#ffc765}.neb-monitor .critical{color:#ff7e7e}
+.neb-ledger-table{width:100%;border-collapse:collapse}.neb-ledger-table th,.neb-ledger-table td{padding:9px 10px;border-bottom:1px solid #e8edf4;text-align:left}.neb-ledger-table th{background:#061b46;color:#fff}
+.neb-doc-class-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.neb-doc-class{padding:15px;border:1px solid #e2e8f1;border-radius:14px;background:#fff}.neb-doc-class strong{color:#061b46}
+.neb-status-pill{display:inline-flex;padding:5px 9px;border-radius:999px;background:#eef3fb;color:#244f94;font-size:11px;font-weight:850}
+@media(max-width:1050px){.neb-pro-shell{grid-template-columns:1fr}.neb-pro-side{position:relative;height:auto}.neb-pro-nav{grid-template-columns:repeat(3,1fr)}.neb-pro-kpis{grid-template-columns:repeat(3,1fr)}.neb-control-wall,.neb-doc-class-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.neb-pro-main{padding:18px 14px 50px}.neb-pro-nav{grid-template-columns:1fr 1fr}.neb-pro-kpis{grid-template-columns:1fr 1fr}.neb-control-wall,.neb-doc-class-grid{grid-template-columns:1fr}.neb-pro-top{align-items:flex-start;flex-direction:column}}

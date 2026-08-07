@@ -15,3 +15,11 @@ window.NEBRIN_ROLE_DASHBOARD={
 'Staff':'staff-room.html'
 };
 window.nebrinOpenRoleDashboard=function(role){location.href=window.NEBRIN_ROLE_DASHBOARD[role]||'staff-room.html';};
+
+window.nebrinDashboardForProfile=function(p){
+ if(!p)return 'admin.html';
+ if(['CEO','Super Admin'].includes(p.role))return 'ceo.html';
+ if(p.role==='Manager')return 'manager.html';
+ const codeMap={'Management':'manager.html','Secretary & Digital Reception':'secretary.html','Customer Care & Client Relations':'customer-care-dashboard.html','Human Resources & Recruitment':'hr.html','Finance & Accounts':'finance.html','Business & Entrepreneurship':'business.html','Legal & Legal Advisory':'legal.html','Registration & Government Services':'registration.html','Sales Field & Agency Operations':'sales-field.html','Graphics, Branding & Creative':'graphics.html','Information Technology & Digital Services':'it.html','Central Registry & Records':'registry.html','Security & Risk Management':'security-department.html','Publishing & Content Management':'cms.html'};
+ return codeMap[p.department]||window.NEBRIN_ROLE_DASHBOARD[p.role]||'staff-room.html';
+};

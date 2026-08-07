@@ -1,4 +1,4 @@
-let currentProfile=null;
+let currentProfile=null;let currentAttendanceRow=null;
 const accessBox=document.getElementById('attendanceAccess');
 const workspace=document.getElementById('attendanceWorkspace');
 function esc(v=''){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
@@ -17,7 +17,7 @@ async function initAttendance(){
 async function loadToday(){
  const {data,error}=await supabaseClient.rpc('get_my_attendance_today');
  if(error){document.getElementById('attendanceStatus').textContent=error.message;return;}
- const row=Array.isArray(data)?data[0]:data;
+ const row=Array.isArray(data)?data[0]:data;currentAttendanceRow=row;
  const schedule=row?.scheduled_start||'08:00';
  document.getElementById('todaySchedule').innerHTML=`<strong>Official start: ${esc(schedule)}</strong><span>Grace period: ${esc(row?.grace_minutes??15)} minutes</span>`;
  document.getElementById('todayAttendance').innerHTML=row?.attendance_id?`<div class="attendance-summary"><span class="attendance-badge ${String(row.status).toLowerCase().replaceAll(' ','-')}">${esc(row.status)}</span><p><strong>Check-in:</strong> ${fmt(row.check_in_at)}</p><p><strong>Check-out:</strong> ${fmt(row.check_out_at)}</p></div>`:'<div class="attendance-summary"><span class="attendance-badge not-checked-in">Not checked in</span></div>';
@@ -41,11 +41,11 @@ document.getElementById('checkOutBtn').addEventListener('click',()=>mark('out'))
 initAttendance();
 async function loadBreak(){
  const {data,error}=await supabaseClient.rpc('get_my_current_break');
- const row=Array.isArray(data)?data[0]:data;
- const on=!!row?.break_id;
- document.getElementById('startBreakBtn').disabled=on;
+ const row=Array.isArray(data)?data[0]:data;const on=!!row?.break_id;
+ const canStart=!!currentAttendanceRow?.check_in_at&&!currentAttendanceRow?.check_out_at&&!on;
+ document.getElementById('startBreakBtn').disabled=!canStart;
  document.getElementById('returnBreakBtn').disabled=!on;
- document.getElementById('breakStatus').innerHTML=on?`<div class="expiry-note"><strong>${esc(row.break_type)}</strong> started ${fmt(row.started_at)}. Allowed: ${row.allowed_minutes} minutes.</div>`:'';
+ document.getElementById('breakStatus').innerHTML=on?`<div class="expiry-note"><strong>${esc(row.break_type)}</strong> started ${fmt(row.started_at)}. Allowed: ${row.allowed_minutes} minutes.</div>`:(!currentAttendanceRow?.check_in_at?'<div class="expiry-note">Check in before starting a break.</div>':'');
 }
-document.getElementById('startBreakBtn').addEventListener('click',async()=>{const type=prompt('Break type: Tea Break or Lunch Break','Tea Break');if(!type)return;const {error}=await supabaseClient.rpc('start_staff_break',{p_break_type:type});attendanceStatus.textContent=error?error.message:'Break started. Return within 30 minutes.';loadBreak();});
+document.getElementById('startBreakBtn').addEventListener('click',async()=>{if(!currentAttendanceRow?.check_in_at||currentAttendanceRow?.check_out_at)return NEBUI.toast('Check in first before starting a break.','error');NEBUI.modal({title:'Start 30-Minute Break',fields:[{name:'type',label:'Break type',type:'select',options:['Tea Break','Lunch Break']}],submitText:'Start Break',onSubmit:async v=>{const {error}=await supabaseClient.rpc('start_staff_break',{p_break_type:v.type});if(error)throw error;attendanceStatus.textContent='Break started.';await loadBreak();return true}});});
 document.getElementById('returnBreakBtn').addEventListener('click',async()=>{const {error}=await supabaseClient.rpc('end_staff_break');attendanceStatus.textContent=error?error.message:'Welcome back. Break ended.';loadBreak();});
