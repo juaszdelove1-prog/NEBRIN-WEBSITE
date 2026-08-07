@@ -499,3 +499,36 @@ html[dir="rtl"] .application-form label,html[dir="rtl"] .track-card{text-align:r
 .office-status-banner{padding:14px 16px;border-radius:13px;margin-top:18px;font-weight:800}.office-status-banner.open{background:#eafaf1;color:#166534}.office-status-banner.closed{background:#fff3e8;color:#9a4700}.v26-contact-links{display:grid;gap:12px}.v26-contact-links a{padding:14px;border:1px solid #e4eaf3;border-radius:12px;color:#17315d;font-weight:800}
 @media(max-width:1000px){.v26-content-grid,.v26-product-grid{grid-template-columns:1fr 1fr}.v26-team-grid{grid-template-columns:repeat(3,1fr)}.v26-store-layout,.v26-office-grid{grid-template-columns:1fr}.v26-cart{position:static}}
 @media(max-width:680px){.v26-content-grid,.v26-product-grid,.v26-team-grid,.v26-public-form{grid-template-columns:1fr}.v26-public-form .full{grid-column:auto}.v26-public-nav{display:none}}
+
+/* =========================================================
+   NEBRIN V27 FINAL INTEGRATED DIGITAL OFFICE
+   ========================================================= */
+:root{--neb-navy:#061b46;--neb-blue:#0b3977;--neb-orange:#ff6a00;--neb-soft:#f4f7fb;--neb-border:#e4eaf3;--neb-text:#17243a;--neb-muted:#667085}
+.neb-shell{width:min(1500px,94%);margin:30px auto 70px}
+.neb-commandbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:15px 0 22px}
+.neb-commandbar .btn{white-space:nowrap}
+.neb-status-grid{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:14px;margin:18px 0}
+.neb-card{background:#fff;border:1px solid var(--neb-border);border-radius:18px;padding:20px;box-shadow:0 10px 30px rgba(6,27,70,.055)}
+.neb-card h2,.neb-card h3{margin-top:0;color:var(--neb-navy)}
+.neb-stat{background:#fff;border:1px solid var(--neb-border);border-radius:16px;padding:16px}
+.neb-stat span{display:block;color:var(--neb-muted);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.neb-stat strong{font-size:1.7rem;color:var(--neb-navy)}
+.neb-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.neb-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.neb-panel-list{display:grid;gap:10px}.neb-row{border:1px solid var(--neb-border);border-radius:13px;padding:13px;background:#fff}
+.neb-row-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.neb-row p{margin:6px 0;color:var(--neb-muted);line-height:1.5}
+.neb-tags{display:flex;gap:6px;flex-wrap:wrap}.neb-tag{font-size:11px;font-weight:850;border-radius:999px;background:#eef4ff;color:#244f94;padding:5px 9px}
+.neb-tag.orange{background:#fff0e5;color:#a64400}.neb-tag.red{background:#feecec;color:#a51d1d}.neb-tag.green{background:#eaf8ef;color:#176b36}
+.neb-shared{border-top:4px solid var(--neb-orange)}.neb-hod{border-top:4px solid #2b69c9}.neb-security{border-top:4px solid #c62828}
+.neb-form{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.neb-form label{display:grid;gap:6px;font-weight:750;color:var(--neb-navy)}
+.neb-form input,.neb-form select,.neb-form textarea{width:100%;padding:11px;border:1px solid #d6dfeb;border-radius:9px;font:inherit;background:#fff}
+.neb-form .full{grid-column:1/-1}.neb-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.neb-section-title{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:26px 0 10px}.neb-section-title h2{margin:0}
+.neb-alert{padding:12px 14px;border-radius:10px;background:#f7f9fc;border:1px solid var(--neb-border);margin:10px 0}.neb-alert.high{background:#fff2f2;border-color:#f4b7b7;color:#8b1111}
+.neb-break-lounge{background:linear-gradient(135deg,#f7fbff,#fff7ee);border:1px solid #dce8f6;border-radius:18px;padding:18px}
+.neb-lounge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.neb-lounge-tile{border:1px solid var(--neb-border);background:#fff;border-radius:13px;padding:14px;cursor:pointer;text-align:left}
+.neb-countdown{font-size:2rem;font-weight:900;color:var(--neb-orange)}
+.neb-table-wrap{overflow:auto}.neb-table{width:100%;border-collapse:collapse}.neb-table th,.neb-table td{padding:10px;border-bottom:1px solid var(--neb-border);text-align:left;font-size:13px}.neb-table th{background:var(--neb-navy);color:#fff}
+.neb-system-health{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.neb-health{border-left:5px solid #1b8b4a}.neb-health.warning{border-left-color:#e58b00}.neb-health.critical{border-left-color:#c62828}
+.neb-hidden{display:none!important}
+@media(max-width:1100px){.neb-status-grid{grid-template-columns:repeat(3,1fr)}.neb-grid-3{grid-template-columns:1fr 1fr}.neb-lounge-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:720px){.neb-status-grid,.neb-grid-2,.neb-grid-3,.neb-form,.neb-system-health{grid-template-columns:1fr}.neb-form .full{grid-column:auto}.neb-lounge-grid{grid-template-columns:1fr}.neb-shell{width:94%;margin-top:18px}}
