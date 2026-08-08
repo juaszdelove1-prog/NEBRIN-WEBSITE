@@ -19,9 +19,8 @@ async function showDashboard(){
   await Promise.all([loadStaffMembers(),loadPendingStaff(),loadApplications(),loadServices(),loadAppointments(),loadFeedbackSummary(),loadPaymentMethods(),loadPaymentBillCount()]);
   subscribeRealtime();
 }
-document.getElementById('loginBtn').addEventListener('click',async()=>{
 
-  document.getElementById('loginBtn').addEventListener('click',async()=>{
+document.getElementById('loginBtn').addEventListener('click',async()=>{
 
   const email=document.getElementById('loginEmail').value.trim();
   const password=document.getElementById('loginPassword').value;
