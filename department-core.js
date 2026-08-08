@@ -13,10 +13,41 @@ NEBRIN.auth=async function(expectedCodes=[]){
  const {data:p,error}=await supabaseClient.from('admin_users').select('*').eq('user_id',user.id).maybeSingle();
  if(error||!p||p.approval_status!=='Approved'||!p.is_active){if(access)access.textContent='Approved active staff access is required.';return false}
  NEBRIN.profile=p;
- let d=null;
- if(p.department_id){const r=await supabaseClient.from('departments').select('*').eq('id',p.department_id).maybeSingle();d=r.data}
- if(!d&&p.department){const r=await supabaseClient.from('departments').select('*').ilike('name',p.department).maybeSingle();d=r.data}
- NEBRIN.department=d||null;
+ let d = null;
+
+if (expectedCodes && expectedCodes.length) {
+  const r = await supabaseClient
+    .from('departments')
+    .select('*')
+    .in('code', expectedCodes)
+    .eq('is_active', true)
+    .limit(1)
+    .maybeSingle();
+
+  d = r.data || null;
+}
+
+if (!d && p.department_id) {
+  const r = await supabaseClient
+    .from('departments')
+    .select('*')
+    .eq('id', p.department_id)
+    .maybeSingle();
+
+  d = r.data || null;
+}
+
+if (!d && p.department) {
+  const r = await supabaseClient
+    .from('departments')
+    .select('*')
+    .ilike('name', p.department)
+    .maybeSingle();
+
+  d = r.data || null;
+}
+
+NEBRIN.department = d || null;
  const management=['CEO','Super Admin','Manager'].includes(p.role);
  if(expectedCodes.length&&!management&&(!d||!expectedCodes.includes(d.code))){
    if(access)access.textContent='You do not have access to this department.';return false;
