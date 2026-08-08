@@ -23,7 +23,14 @@
       }
       const {data:office}=await supabaseClient.rpc('public_office_status');
       const o=Array.isArray(office)?office[0]:office;
-      if(o && !o.is_open && !profile.after_hours_authorized){
+     const managementAccess = ['CEO','Super Admin','Manager'].includes(profile.role);
+
+if(
+  o &&
+  !o.is_open &&
+  !managementAccess &&
+  !profile.after_hours_authorized
+){ 
         document.body.innerHTML=`<main class="staff-signup-shell"><section class="staff-signup-card">
         <p class="section-label">DIGITAL OFFICE CLOSED</p><h1>Office access is currently closed</h1>
         <p>NEBRIN staff working hours are ${o.open_time}–${o.close_time} Tanzania time. Your session has been protected and no operational work can be performed until opening time.</p>
