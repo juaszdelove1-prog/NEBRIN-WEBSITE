@@ -19,8 +19,38 @@ async function showDashboard(){
   await Promise.all([loadStaffMembers(),loadPendingStaff(),loadApplications(),loadServices(),loadAppointments(),loadFeedbackSummary(),loadPaymentMethods(),loadPaymentBillCount()]);
   subscribeRealtime();
 }
-document.getElementById('loginBtn').addEventListener('click',async()=>{const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value,status=document.getElementById('loginStatus');status.textContent='Signing in…';const {data:auth,error}=await supabaseClient.auth.signInWithPassword({email,password});const {data:officeAccess,error:officeError}
+document.getElementById('loginBtn').addEventListener('click',async()=>{const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value,status=document.getElementById('loginStatus');status.textContent='Signing in…';const {data:auth,error}=await supabaseClient.auth.signInWithPassword({email,password});const {data:auth,error}=await supabaseClient.auth
+  .signInWithPassword({email,password});
+
+if(error){
+  status.className='error';
+  status.textContent=error.message;
+  return;
+}
+
+const {data:officeAccess,error:officeError}
   = await supabaseClient.rpc('can_access_office_now');
+
+if(officeError){
+  await supabaseClient.auth.signOut();
+  status.className='error';
+  status.textContent='Unable to verify office access. Please try again.';
+  return;
+}
+
+const office=Array.isArray(officeAccess)
+  ? officeAccess[0]
+  : officeAccess;
+
+if(office && !office.allowed){
+  await supabaseClient.auth.signOut();
+
+  status.className='error';
+  status.textContent=
+    'OFFICE CLOSED — Muda rasmi wa ofisi umekwisha. Tafadhali fanya kazi zako kwa wakati.';
+
+  return;
+}
 
 if(officeError){
   await supabaseClient.auth.signOut();
