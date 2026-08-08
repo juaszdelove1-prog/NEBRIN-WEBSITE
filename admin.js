@@ -19,7 +19,29 @@ async function showDashboard(){
   await Promise.all([loadStaffMembers(),loadPendingStaff(),loadApplications(),loadServices(),loadAppointments(),loadFeedbackSummary(),loadPaymentMethods(),loadPaymentBillCount()]);
   subscribeRealtime();
 }
-document.getElementById('loginBtn').addEventListener('click',async()=>{const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value,status=document.getElementById('loginStatus');status.textContent='Signing in…';const {data:auth,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error){status.className='error';status.textContent=error.message;return;}sessionStorage.setItem('nebrinStaffAuthenticated','true');const {data:p}=await supabaseClient.from('admin_users').select('*').eq('user_id',auth.user.id).maybeSingle();if(p&&p.approval_status==='Approved'&&p.is_active){location.href=window.nebrinDashboardForProfile?.(p)||'staff-room.html';return;}await showDashboard();});
+document.getElementById('loginBtn').addEventListener('click',async()=>{const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value,status=document.getElementById('loginStatus');status.textContent='Signing in…';const {data:auth,error}=await supabaseClient.auth.signInWithPassword({email,password});const {data:officeAccess,error:officeError}
+  = await supabaseClient.rpc('can_access_office_now');
+
+if(officeError){
+  await supabaseClient.auth.signOut();
+  status.className='error';
+  status.textContent='Unable to verify office access. Please try again.';
+  return;
+}
+
+const office = Array.isArray(officeAccess)
+  ? officeAccess[0]
+  : officeAccess;
+
+if(office && !office.allowed){
+  await supabaseClient.auth.signOut();
+
+  status.className='error';
+  status.textContent =
+    'OFFICE CLOSED — Muda rasmi wa ofisi umekwisha. Tafadhali fanya kazi zako kwa wakati.';
+
+  return;
+}sessionStorage.setItem('nebrinStaffAuthenticated','true');const {data:p}=await supabaseClient.from('admin_users').select('*').eq('user_id',auth.user.id).maybeSingle();if(p&&p.approval_status==='Approved'&&p.is_active){location.href=window.nebrinDashboardForProfile?.(p)||'staff-room.html';return;}await showDashboard();});
 document.getElementById('logoutBtn').addEventListener('click',async()=>{sessionStorage.removeItem('nebrinStaffAuthenticated');await supabaseClient.auth.signOut();location.reload();});
 document.getElementById('refreshBtn').addEventListener('click',loadApplications);
 document.getElementById('searchBox').addEventListener('input',render);
