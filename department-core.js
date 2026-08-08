@@ -20,7 +20,7 @@ if (expectedCodes && expectedCodes.length) {
     .from('departments')
     .select('*')
     .in('code', expectedCodes)
-    .eq('is_active', true)
+    
     .limit(1)
     .maybeSingle();
 
