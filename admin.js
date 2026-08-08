@@ -21,6 +21,8 @@ async function showDashboard(){
 }
 document.getElementById('loginBtn').addEventListener('click',async()=>{
 
+  document.getElementById('loginBtn').addEventListener('click',async()=>{
+
   const email=document.getElementById('loginEmail').value.trim();
   const password=document.getElementById('loginPassword').value;
   const status=document.getElementById('loginStatus');
@@ -62,7 +64,10 @@ document.getElementById('loginBtn').addEventListener('click',async()=>{
     return;
   }
 
-  sessionStorage.setItem('nebrinStaffAuthenticated','true');
+  sessionStorage.setItem(
+    'nebrinStaffAuthenticated',
+    'true'
+  );
 
   const {data:p,error:profileError}
     =await supabaseClient
@@ -80,7 +85,10 @@ document.getElementById('loginBtn').addEventListener('click',async()=>{
     return;
   }
 
-  if(p.approval_status!=='Approved' || !p.is_active){
+  if(
+    p.approval_status!=='Approved' ||
+    !p.is_active
+  ){
     sessionStorage.removeItem('nebrinStaffAuthenticated');
     await supabaseClient.auth.signOut();
 
@@ -93,115 +101,6 @@ document.getElementById('loginBtn').addEventListener('click',async()=>{
   status.className='success';
   status.textContent='Access granted. Opening office…';
 
-  location.href=
-    window.nebrinDashboardForProfile?.(p)
-    ||'staff-room.html';
-
-});
-  const email=document.getElementById('loginEmail').value.trim();
-  const password=document.getElementById('loginPassword').value;
-  const status=document.getElementById('loginStatus');
-
-  status.className='';
-  status.textContent='Signing in…';
-
-  // 1. Authenticate email + password
-  const {data:auth,error}=await supabaseClient.auth
-    .signInWithPassword({email,password});
-
-  if(error){
-    status.className='error';
-    status.textContent=error.message;
-    return;
-  }
-
-  // 2. Check official office-hours access
-  const {data:officeAccess,error:officeError}
-    =await supabaseClient.rpc('can_access_office_now');
-
-  if(officeError){
-    await supabaseClient.auth.signOut();
-
-    status.className='error';
-    status.textContent=
-      'Unable to verify office access. Please try again.';
-
-    return;
-  }
-
-  const office=Array.isArray(officeAccess)
-    ? officeAccess[0]
-    : officeAccess;
-
-  // 3. Stop normal staff from logging in after closing time
-  if(office && !office.allowed){
-
-    await supabaseClient.auth.signOut();
-
-    sessionStorage.removeItem(
-      'nebrinStaffAuthenticated'
-    );
-
-    status.className='error';
-
-    status.textContent=
-      'OFFICE CLOSED — Muda rasmi wa ofisi umekwisha. Tafadhali fanya kazi zako kwa wakati.';
-
-    return;
-  }
-
-  // 4. Authentication + office access successful
-  sessionStorage.setItem(
-    'nebrinStaffAuthenticated',
-    'true'
-  );
-
-  // 5. Load approved NEBRIN staff profile
-  const {data:p,error:profileError}
-    =await supabaseClient
-      .from('admin_users')
-      .select('*')
-      .eq('user_id',auth.user.id)
-      .maybeSingle();
-
-  if(profileError || !p){
-
-    sessionStorage.removeItem(
-      'nebrinStaffAuthenticated'
-    );
-
-    await supabaseClient.auth.signOut();
-
-    status.className='error';
-    status.textContent=
-      'Staff profile could not be verified.';
-
-    return;
-  }
-
-  // 6. Account must be approved and active
-  if(
-    p.approval_status!=='Approved' ||
-    !p.is_active
-  ){
-
-    sessionStorage.removeItem(
-      'nebrinStaffAuthenticated'
-    );
-
-    await supabaseClient.auth.signOut();
-
-    status.className='error';
-    status.textContent=
-      'Your NEBRIN staff account is not approved or active.';
-
-    return;
-  }
-
-  status.className='success';
-  status.textContent='Access granted. Opening office…';
-
-  // 7. Send staff to their correct dashboard
   location.href=
     window.nebrinDashboardForProfile?.(p)
     ||'staff-room.html';
