@@ -779,14 +779,17 @@ async function loadPaymentBillCount(){
 }
 
 
-/* =========================================================
-   NEBRIN - HIRE EMPLOYEE
-   Replaces old Staff Invitation Links UI
-   ========================================================= */
+/*
+====================================================
+        NEBRIN - HIRE EMPLOYEE
+        HR EMPLOYMENT + SALARY + PAYMENT
+====================================================
+*/
 
 (function initNebrinHireEmployee(){
 
   function start(){
+
     const panel = document.getElementById('staffInvitePanel');
 
     if(!panel){
@@ -798,8 +801,8 @@ async function loadPaymentBillCount(){
       <h2>Hire Employee</h2>
 
       <p>
-        Create a NEBRIN staff account and assign the employee
-        to the correct role and department.
+        Create a NEBRIN staff account, assign employment details,
+        salary and payment information.
       </p>
 
       <div class="service-form-grid">
@@ -839,10 +842,10 @@ async function loadPaymentBillCount(){
           <select id="hireRole">
             <option value="">Choose role</option>
 
-            <option value="HR">HR</option>
             <option value="Manager">Manager</option>
             <option value="Secretary">Secretary</option>
             <option value="Customer Care">Customer Care</option>
+            <option value="HR">HR</option>
 
             <option value="Accountant">Accountant</option>
             <option value="Finance Officer">Finance Officer</option>
@@ -880,27 +883,178 @@ async function loadPaymentBillCount(){
             <option value="Management">Management</option>
             <option value="Human Resources">Human Resources</option>
             <option value="Finance">Finance</option>
+
             <option value="Business & Entrepreneurship">
               Business & Entrepreneurship
             </option>
+
             <option value="Registration & Government Services">
               Registration & Government Services
             </option>
+
             <option value="Sales & Field Operations">
               Sales & Field Operations
             </option>
+
             <option value="Customer Care">Customer Care</option>
             <option value="Graphics">Graphics</option>
             <option value="Digital Services">Digital Services</option>
             <option value="IT">IT</option>
-            <option value="Registry & Records">Registry & Records</option>
+
+            <option value="Registry & Records">
+              Registry & Records
+            </option>
+
             <option value="Security">Security</option>
+          </select>
+        </label>
+
+        <label>
+          Job Title
+          <input
+            id="hireJobTitle"
+            type="text"
+            placeholder="e.g. Accountant"
+          >
+        </label>
+
+        <label>
+          Employment Type
+          <select id="hireEmploymentType">
+            <option value="Permanent">Permanent</option>
+            <option value="Contract">Contract</option>
+            <option value="Temporary">Temporary</option>
+            <option value="Part Time">Part Time</option>
+            <option value="Internship">Internship</option>
+          </select>
+        </label>
+
+        <label>
+          Basic Salary (TZS)
+          <input
+            id="hireBasicSalary"
+            type="number"
+            min="0"
+            step="1"
+            placeholder="e.g. 600000"
+          >
+        </label>
+
+        <label>
+          Employment Status
+          <select id="hireEmploymentStatus">
+            <option value="Active">Active</option>
+            <option value="Probation">Probation</option>
+          </select>
+        </label>
+
+        <label>
+          Payment Method
+          <select id="hirePaymentMethod">
+            <option value="">Choose payment method</option>
+            <option value="BANK">Bank Account</option>
+            <option value="MOBILE_MONEY">Mobile Money</option>
           </select>
         </label>
 
       </div>
 
-      <div style="margin-top:16px">
+
+      <div
+        id="hireBankFields"
+        class="service-form-grid hidden"
+        style="margin-top:16px"
+      >
+
+        <label>
+          Bank Name
+          <input
+            id="hireBankName"
+            type="text"
+            placeholder="e.g. CRDB"
+          >
+        </label>
+
+        <label>
+          Account Name
+          <input
+            id="hireBankAccountName"
+            type="text"
+            placeholder="Account holder name"
+          >
+        </label>
+
+        <label>
+          Account Number
+          <input
+            id="hireBankAccountNumber"
+            type="text"
+            placeholder="Bank account number"
+          >
+        </label>
+
+      </div>
+
+
+      <div
+        id="hireMobileFields"
+        class="service-form-grid hidden"
+        style="margin-top:16px"
+      >
+
+        <label>
+          Mobile Network
+          <select id="hireMobileNetwork">
+            <option value="">Choose network</option>
+            <option value="M-Pesa">M-Pesa</option>
+            <option value="Mixx by Yas">Mixx by Yas</option>
+            <option value="Airtel Money">Airtel Money</option>
+            <option value="HaloPesa">HaloPesa</option>
+          </select>
+        </label>
+
+        <label>
+          Mobile Account Name
+          <input
+            id="hireMobileAccountName"
+            type="text"
+            placeholder="Registered account name"
+          >
+        </label>
+
+        <label>
+          Mobile Number
+          <input
+            id="hireMobileNumber"
+            type="tel"
+            placeholder="07XXXXXXXX"
+          >
+        </label>
+
+      </div>
+
+
+      <div style="margin-top:18px">
+
+        <label style="display:flex;align-items:center;gap:10px">
+          <input
+            id="hireCertificateRequired"
+            type="checkbox"
+            style="width:auto"
+          >
+
+          Certificate required for this position
+        </label>
+
+        <small>
+          Leave unchecked when certificates are not required.
+        </small>
+
+      </div>
+
+
+      <div style="margin-top:20px">
+
         <button
           id="hireEmployeeBtn"
           class="btn btn-primary"
@@ -908,7 +1062,9 @@ async function loadPaymentBillCount(){
         >
           Hire Employee
         </button>
+
       </div>
+
 
       <p id="hireEmployeeStatus"></p>
 
@@ -919,66 +1075,192 @@ async function loadPaymentBillCount(){
       ></div>
     `;
 
-    const button = document.getElementById('hireEmployeeBtn');
 
-    button?.addEventListener('click', hireEmployee);
+    const paymentMethod =
+      document.getElementById('hirePaymentMethod');
+
+    paymentMethod?.addEventListener(
+      'change',
+      updatePaymentFields
+    );
+
+
+    document
+      .getElementById('hireEmployeeBtn')
+      ?.addEventListener(
+        'click',
+        hireEmployee
+      );
+  }
+
+
+  function updatePaymentFields(){
+
+    const method =
+      document.getElementById('hirePaymentMethod')?.value;
+
+    const bankFields =
+      document.getElementById('hireBankFields');
+
+    const mobileFields =
+      document.getElementById('hireMobileFields');
+
+
+    bankFields?.classList.toggle(
+      'hidden',
+      method !== 'BANK'
+    );
+
+    mobileFields?.classList.toggle(
+      'hidden',
+      method !== 'MOBILE_MONEY'
+    );
+  }
+
+
+  function value(id){
+
+    return (
+      document.getElementById(id)?.value || ''
+    ).trim();
   }
 
 
   async function hireEmployee(){
 
-    const fullName =
-      document.getElementById('hireFullName')?.value.trim();
+    const fullName = value('hireFullName');
+    const email = value('hireEmail').toLowerCase();
+    const phone = value('hirePhone');
+    const role = value('hireRole');
+    const department = value('hireDepartment');
 
-    const email =
-      document.getElementById('hireEmail')?.value.trim().toLowerCase();
+    const jobTitle = value('hireJobTitle');
 
-    const phone =
-      document.getElementById('hirePhone')?.value.trim();
+    const employmentType =
+      value('hireEmploymentType') || 'Permanent';
 
-    const role =
-      document.getElementById('hireRole')?.value;
+    const employmentStatus =
+      value('hireEmploymentStatus') || 'Active';
 
-    const department =
-      document.getElementById('hireDepartment')?.value;
+    const basicSalary =
+      Number(value('hireBasicSalary') || 0);
+
+    const paymentMethod =
+      value('hirePaymentMethod');
+
+
+    const certificateRequired =
+      document.getElementById(
+        'hireCertificateRequired'
+      )?.checked === true;
+
+
+    const bankName =
+      value('hireBankName');
+
+    const bankAccountName =
+      value('hireBankAccountName');
+
+    const bankAccountNumber =
+      value('hireBankAccountNumber');
+
+
+    const mobileNetwork =
+      value('hireMobileNetwork');
+
+    const mobileAccountName =
+      value('hireMobileAccountName');
+
+    const mobileNumber =
+      value('hireMobileNumber');
+
 
     const status =
-      document.getElementById('hireEmployeeStatus');
+      document.getElementById(
+        'hireEmployeeStatus'
+      );
 
-    const resultBox =
-      document.getElementById('hireEmployeeResult');
+    const result =
+      document.getElementById(
+        'hireEmployeeResult'
+      );
 
     const button =
-      document.getElementById('hireEmployeeBtn');
+      document.getElementById(
+        'hireEmployeeBtn'
+      );
 
 
-    if(!fullName || !email || !role || !department){
+    if(
+      !fullName ||
+      !email ||
+      !role ||
+      !department ||
+      !jobTitle
+    ){
       status.className = 'error';
+
       status.textContent =
-        'Full name, email, role and department are required.';
+        'Full name, email, role, department and job title are required.';
+
       return;
     }
 
 
-    /*
-      HR must not appoint protected senior roles.
-      CEO / Super Admin may do so where applicable.
-    */
-    const protectedRoles = [
-      'CEO',
-      'Super Admin',
-      'Manager',
-      'System Administrator',
-      'HOD'
-    ];
-
     if(
-      currentStaff?.role === 'HR' &&
-      protectedRoles.includes(role)
+      !Number.isFinite(basicSalary) ||
+      basicSalary < 0
     ){
       status.className = 'error';
+
       status.textContent =
-        'HR is not authorized to assign this senior management role.';
+        'Enter a valid basic salary.';
+
+      return;
+    }
+
+
+    if(!paymentMethod){
+
+      status.className = 'error';
+
+      status.textContent =
+        'Choose employee payment method.';
+
+      return;
+    }
+
+
+    if(
+      paymentMethod === 'BANK' &&
+      (
+        !bankName ||
+        !bankAccountName ||
+        !bankAccountNumber
+      )
+    ){
+      status.className = 'error';
+
+      status.textContent =
+        'Complete the employee bank account details.';
+
+      return;
+    }
+
+
+    if(
+      paymentMethod === 'MOBILE_MONEY' &&
+      (
+        !mobileNetwork ||
+        !mobileAccountName ||
+        !mobileNumber
+      )
+    ){
+      status.className = 'error';
+
+      status.textContent =
+        'Complete the employee mobile money details.';
+
       return;
     }
 
@@ -986,24 +1268,73 @@ async function loadPaymentBillCount(){
     try{
 
       button.disabled = true;
+
       status.className = '';
+
       status.textContent =
-        'Creating employee account…';
+        'Creating NEBRIN employee account...';
 
-      resultBox?.classList.add('hidden');
+      result?.classList.add('hidden');
 
 
-      const {data, error} =
+      const payload = {
+
+        full_name: fullName,
+        email,
+        phone: phone || null,
+
+        role,
+        department,
+
+        job_title: jobTitle,
+        employment_type: employmentType,
+        employment_status: employmentStatus,
+
+        basic_salary: basicSalary,
+        currency: 'TZS',
+
+        payment_method: paymentMethod,
+
+        bank_name:
+          paymentMethod === 'BANK'
+            ? bankName
+            : null,
+
+        bank_account_name:
+          paymentMethod === 'BANK'
+            ? bankAccountName
+            : null,
+
+        bank_account_number:
+          paymentMethod === 'BANK'
+            ? bankAccountNumber
+            : null,
+
+        mobile_network:
+          paymentMethod === 'MOBILE_MONEY'
+            ? mobileNetwork
+            : null,
+
+        mobile_account_name:
+          paymentMethod === 'MOBILE_MONEY'
+            ? mobileAccountName
+            : null,
+
+        mobile_number:
+          paymentMethod === 'MOBILE_MONEY'
+            ? mobileNumber
+            : null,
+
+        certificate_required:
+          certificateRequired
+      };
+
+
+      const { data, error } =
         await supabaseClient.functions.invoke(
           'hire-employee',
           {
-            body:{
-              full_name: fullName,
-              email,
-              phone: phone || null,
-              role,
-              department
-            }
+            body: payload
           }
         );
 
@@ -1014,6 +1345,7 @@ async function loadPaymentBillCount(){
 
 
       if(!data?.success){
+
         throw new Error(
           data?.error ||
           'Employee could not be hired.'
@@ -1022,81 +1354,100 @@ async function loadPaymentBillCount(){
 
 
       status.className = 'success';
+
       status.textContent =
         'Employee hired successfully.';
 
 
-      if(resultBox){
+      if(result){
 
-        const tempPin =
-          data?.onboarding?.temporary_pin || '';
+        result.innerHTML = '';
 
-        resultBox.innerHTML = `
-          <div>
-            <strong>
-              🎉 Congratulations!
-            </strong>
-          </div>
+        const title =
+          document.createElement('strong');
 
-          <p>
-            ${esc(fullName)} has been successfully hired by NEBRIN.
-          </p>
+        title.textContent =
+          '🎉 NEBRIN Employment Successful';
 
-          <p>
-            <strong>Email:</strong>
-            ${esc(email)}
-          </p>
+        result.appendChild(title);
 
-          <p>
-            <strong>Role:</strong>
-            ${esc(role)}
-          </p>
 
-          <p>
-            <strong>Department:</strong>
-            ${esc(department)}
-          </p>
+        const employeeText =
+          document.createElement('p');
 
-          ${
-            tempPin
-            ? `
-              <p>
-                <strong>Temporary PIN:</strong>
-                ${esc(tempPin)}
-              </p>
+        employeeText.textContent =
+          fullName +
+          ' has been successfully added to the NEBRIN staff system.';
 
-              <p class="admin-detail">
-                Employee must change this PIN on first login.
-              </p>
-            `
-            : ''
-          }
-        `;
+        result.appendChild(employeeText);
 
-        resultBox.classList.remove('hidden');
+
+        const roleText =
+          document.createElement('p');
+
+        roleText.textContent =
+          'Role: ' + role;
+
+        result.appendChild(roleText);
+
+
+        const departmentText =
+          document.createElement('p');
+
+        departmentText.textContent =
+          'Department: ' + department;
+
+        result.appendChild(departmentText);
+
+
+        const salaryText =
+          document.createElement('p');
+
+        salaryText.textContent =
+          'Basic Salary: TZS ' +
+          basicSalary.toLocaleString();
+
+        result.appendChild(salaryText);
+
+
+        const temporaryPin =
+          data?.onboarding?.temporary_pin;
+
+
+        if(temporaryPin){
+
+          const pinText =
+            document.createElement('p');
+
+          pinText.textContent =
+            'Temporary PIN: ' +
+            temporaryPin;
+
+          result.appendChild(pinText);
+
+
+          const warning =
+            document.createElement('p');
+
+          warning.textContent =
+            'The employee must create a private PIN during first login.';
+
+          result.appendChild(warning);
+        }
+
+
+        result.classList.remove('hidden');
       }
 
-
-      document.getElementById('hireFullName').value='';
-      document.getElementById('hireEmail').value='';
-      document.getElementById('hirePhone').value='';
-      document.getElementById('hireRole').value='';
-      document.getElementById('hireDepartment').value='';
-
-
-      if(typeof loadStaffMembers === 'function'){
-        await loadStaffMembers();
-      }
-
-      if(typeof loadPendingStaff === 'function'){
-        await loadPendingStaff();
-      }
 
     }catch(err){
 
-      console.error('NEBRIN hire employee:',err);
+      console.error(
+        'NEBRIN hire employee error:',
+        err
+      );
 
-      status.className='error';
+      status.className = 'error';
 
       status.textContent =
         err?.message ||
@@ -1104,19 +1455,23 @@ async function loadPaymentBillCount(){
 
     }finally{
 
-      button.disabled=false;
+      button.disabled = false;
 
     }
   }
 
 
   if(document.readyState === 'loading'){
+
     document.addEventListener(
       'DOMContentLoaded',
       start
     );
+
   }else{
+
     start();
+
   }
 
 })();
