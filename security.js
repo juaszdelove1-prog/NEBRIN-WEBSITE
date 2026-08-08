@@ -58,9 +58,19 @@ setTimeout(async()=>{
 },4000);
 
 return;
-        document.getElementById('v27SignOut').onclick=async()=>{await supabaseClient.auth.signOut();location.href='admin.html'};
-      }
-    }catch(e){console.error('NEBRIN security guard:',e)}
-  }
-  setTimeout(enforce,150);
+        setTimeout(async()=>{
+  await supabaseClient.auth.signOut();
+  location.href='admin.html?reason=office_closed';
+},4000);
+
+return;
+}
+
+}catch(e){
+  console.error('NEBRIN security guard:',e)
+}
+}
+
+setTimeout(enforce,150);
 setInterval(enforce,60000);
+})();
