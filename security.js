@@ -31,10 +31,33 @@ if(
   !managementAccess &&
   !profile.after_hours_authorized
 ){ 
-        document.body.innerHTML=`<main class="staff-signup-shell"><section class="staff-signup-card">
-        <p class="section-label">DIGITAL OFFICE CLOSED</p><h1>Office access is currently closed</h1>
-        <p>NEBRIN staff working hours are ${o.open_time}–${o.close_time} Tanzania time. Your session has been protected and no operational work can be performed until opening time.</p>
-        <button id="v27SignOut" class="btn btn-primary">Sign Out</button></section></main>`;
+        document.body.innerHTML=`
+<main class="staff-signup-shell">
+  <section class="staff-signup-card">
+    <p class="section-label">DIGITAL OFFICE CLOSED</p>
+
+    <h1>Office hours have ended</h1>
+
+    <p>
+      NEBRIN staff working hours are
+      ${o.open_time}–${o.close_time} Tanzania time.
+      Muda wa kazi wa leo umekwisha.
+      Tafadhali fanya na ukamilishe kazi zako ndani ya muda rasmi wa ofisi.
+    </p>
+
+    <p>
+      Your session will close automatically.
+    </p>
+  </section>
+</main>
+`;
+
+setTimeout(async()=>{
+  await supabaseClient.auth.signOut();
+  location.href='admin.html?reason=office_closed';
+},4000);
+
+return;
         document.getElementById('v27SignOut').onclick=async()=>{await supabaseClient.auth.signOut();location.href='admin.html'};
       }
     }catch(e){console.error('NEBRIN security guard:',e)}
