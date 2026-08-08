@@ -19,8 +19,7 @@ async function showDashboard(){
   await Promise.all([loadStaffMembers(),loadPendingStaff(),loadApplications(),loadServices(),loadAppointments(),loadFeedbackSummary(),loadPaymentMethods(),loadPaymentBillCount()]);
   subscribeRealtime();
 }
-document.getElementById('loginBtn').addEventListener('click',async()=>{const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value,status=document.getElementById('loginStatus');status.textContent='Signing in…';const {data:auth,error}=await supabaseClient.auth.signInWithPassword({email,password});const {data:auth,error}=await supabaseClient.auth
-  .signInWithPassword({email,password});
+document.getElementById('loginBtn').addEventListener('click',async()=>{const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value,status=document.getElementById('loginStatus');status.textContent='Signing in…';const {data:auth,error}=await supabaseClient.auth.signInWithPassword({email,password});
 
 if(error){
   status.className='error';
