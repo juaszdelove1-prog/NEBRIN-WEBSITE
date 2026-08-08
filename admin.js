@@ -777,3 +777,346 @@ async function loadPaymentBillCount(){
   const el=document.getElementById('statPaymentBills');
   if(el)el.textContent=count||0;
 }
+
+
+/* =========================================================
+   NEBRIN - HIRE EMPLOYEE
+   Replaces old Staff Invitation Links UI
+   ========================================================= */
+
+(function initNebrinHireEmployee(){
+
+  function start(){
+    const panel = document.getElementById('staffInvitePanel');
+
+    if(!panel){
+      console.warn('NEBRIN: staffInvitePanel not found');
+      return;
+    }
+
+    panel.innerHTML = `
+      <h2>Hire Employee</h2>
+
+      <p>
+        Create a NEBRIN staff account and assign the employee
+        to the correct role and department.
+      </p>
+
+      <div class="service-form-grid">
+
+        <label>
+          Full Name
+          <input
+            id="hireFullName"
+            type="text"
+            placeholder="Employee full name"
+            autocomplete="name"
+          >
+        </label>
+
+        <label>
+          Email
+          <input
+            id="hireEmail"
+            type="email"
+            placeholder="employee@example.com"
+            autocomplete="email"
+          >
+        </label>
+
+        <label>
+          Phone Number
+          <input
+            id="hirePhone"
+            type="tel"
+            placeholder="07XXXXXXXX"
+            autocomplete="tel"
+          >
+        </label>
+
+        <label>
+          Role
+          <select id="hireRole">
+            <option value="">Choose role</option>
+
+            <option value="HR">HR</option>
+            <option value="Manager">Manager</option>
+            <option value="Secretary">Secretary</option>
+            <option value="Customer Care">Customer Care</option>
+
+            <option value="Accountant">Accountant</option>
+            <option value="Finance Officer">Finance Officer</option>
+
+            <option value="Business Officer">Business Officer</option>
+            <option value="Legal Officer">Legal Officer</option>
+            <option value="Registration Officer">Registration Officer</option>
+
+            <option value="Sales Field Manager">Sales Field Manager</option>
+            <option value="Field Supervisor">Field Supervisor</option>
+            <option value="Team Leader">Team Leader</option>
+
+            <option value="Lipa Agent">Lipa Agent</option>
+            <option value="SIM Registration Agent">SIM Registration Agent</option>
+
+            <option value="Graphic Designer">Graphic Designer</option>
+            <option value="Printing Officer">Printing Officer</option>
+
+            <option value="IT Officer">IT Officer</option>
+            <option value="System Administrator">System Administrator</option>
+
+            <option value="Registry Officer">Registry Officer</option>
+            <option value="Records Officer">Records Officer</option>
+            <option value="Security Officer">Security Officer</option>
+
+            <option value="Staff">Staff</option>
+          </select>
+        </label>
+
+        <label>
+          Department
+          <select id="hireDepartment">
+            <option value="">Choose department</option>
+
+            <option value="Management">Management</option>
+            <option value="Human Resources">Human Resources</option>
+            <option value="Finance">Finance</option>
+            <option value="Business & Entrepreneurship">
+              Business & Entrepreneurship
+            </option>
+            <option value="Registration & Government Services">
+              Registration & Government Services
+            </option>
+            <option value="Sales & Field Operations">
+              Sales & Field Operations
+            </option>
+            <option value="Customer Care">Customer Care</option>
+            <option value="Graphics">Graphics</option>
+            <option value="Digital Services">Digital Services</option>
+            <option value="IT">IT</option>
+            <option value="Registry & Records">Registry & Records</option>
+            <option value="Security">Security</option>
+          </select>
+        </label>
+
+      </div>
+
+      <div style="margin-top:16px">
+        <button
+          id="hireEmployeeBtn"
+          class="btn btn-primary"
+          type="button"
+        >
+          Hire Employee
+        </button>
+      </div>
+
+      <p id="hireEmployeeStatus"></p>
+
+      <div
+        id="hireEmployeeResult"
+        class="generated-invite-box hidden"
+        style="margin-top:16px"
+      ></div>
+    `;
+
+    const button = document.getElementById('hireEmployeeBtn');
+
+    button?.addEventListener('click', hireEmployee);
+  }
+
+
+  async function hireEmployee(){
+
+    const fullName =
+      document.getElementById('hireFullName')?.value.trim();
+
+    const email =
+      document.getElementById('hireEmail')?.value.trim().toLowerCase();
+
+    const phone =
+      document.getElementById('hirePhone')?.value.trim();
+
+    const role =
+      document.getElementById('hireRole')?.value;
+
+    const department =
+      document.getElementById('hireDepartment')?.value;
+
+    const status =
+      document.getElementById('hireEmployeeStatus');
+
+    const resultBox =
+      document.getElementById('hireEmployeeResult');
+
+    const button =
+      document.getElementById('hireEmployeeBtn');
+
+
+    if(!fullName || !email || !role || !department){
+      status.className = 'error';
+      status.textContent =
+        'Full name, email, role and department are required.';
+      return;
+    }
+
+
+    /*
+      HR must not appoint protected senior roles.
+      CEO / Super Admin may do so where applicable.
+    */
+    const protectedRoles = [
+      'CEO',
+      'Super Admin',
+      'Manager',
+      'System Administrator',
+      'HOD'
+    ];
+
+    if(
+      currentStaff?.role === 'HR' &&
+      protectedRoles.includes(role)
+    ){
+      status.className = 'error';
+      status.textContent =
+        'HR is not authorized to assign this senior management role.';
+      return;
+    }
+
+
+    try{
+
+      button.disabled = true;
+      status.className = '';
+      status.textContent =
+        'Creating employee account…';
+
+      resultBox?.classList.add('hidden');
+
+
+      const {data, error} =
+        await supabaseClient.functions.invoke(
+          'hire-employee',
+          {
+            body:{
+              full_name: fullName,
+              email,
+              phone: phone || null,
+              role,
+              department
+            }
+          }
+        );
+
+
+      if(error){
+        throw error;
+      }
+
+
+      if(!data?.success){
+        throw new Error(
+          data?.error ||
+          'Employee could not be hired.'
+        );
+      }
+
+
+      status.className = 'success';
+      status.textContent =
+        'Employee hired successfully.';
+
+
+      if(resultBox){
+
+        const tempPin =
+          data?.onboarding?.temporary_pin || '';
+
+        resultBox.innerHTML = `
+          <div>
+            <strong>
+              🎉 Congratulations!
+            </strong>
+          </div>
+
+          <p>
+            ${esc(fullName)} has been successfully hired by NEBRIN.
+          </p>
+
+          <p>
+            <strong>Email:</strong>
+            ${esc(email)}
+          </p>
+
+          <p>
+            <strong>Role:</strong>
+            ${esc(role)}
+          </p>
+
+          <p>
+            <strong>Department:</strong>
+            ${esc(department)}
+          </p>
+
+          ${
+            tempPin
+            ? `
+              <p>
+                <strong>Temporary PIN:</strong>
+                ${esc(tempPin)}
+              </p>
+
+              <p class="admin-detail">
+                Employee must change this PIN on first login.
+              </p>
+            `
+            : ''
+          }
+        `;
+
+        resultBox.classList.remove('hidden');
+      }
+
+
+      document.getElementById('hireFullName').value='';
+      document.getElementById('hireEmail').value='';
+      document.getElementById('hirePhone').value='';
+      document.getElementById('hireRole').value='';
+      document.getElementById('hireDepartment').value='';
+
+
+      if(typeof loadStaffMembers === 'function'){
+        await loadStaffMembers();
+      }
+
+      if(typeof loadPendingStaff === 'function'){
+        await loadPendingStaff();
+      }
+
+    }catch(err){
+
+      console.error('NEBRIN hire employee:',err);
+
+      status.className='error';
+
+      status.textContent =
+        err?.message ||
+        'Employee hiring failed. Please try again.';
+
+    }finally{
+
+      button.disabled=false;
+
+    }
+  }
+
+
+  if(document.readyState === 'loading'){
+    document.addEventListener(
+      'DOMContentLoaded',
+      start
+    );
+  }else{
+    start();
+  }
+
+})();
