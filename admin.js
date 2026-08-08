@@ -19,58 +19,117 @@ async function showDashboard(){
   await Promise.all([loadStaffMembers(),loadPendingStaff(),loadApplications(),loadServices(),loadAppointments(),loadFeedbackSummary(),loadPaymentMethods(),loadPaymentBillCount()]);
   subscribeRealtime();
 }
-document.getElementById('loginBtn').addEventListener('click',async()=>{const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value,status=document.getElementById('loginStatus');status.textContent='Signing in…';const {data:auth,error}=await supabaseClient.auth.signInWithPassword({email,password});
+document.getElementById('loginBtn').addEventListener('click',async()=>{const email=document.getElementById('loginBtn').addEventListener('click',async()=>{
 
-if(error){
-  status.className='error';
-  status.textContent=error.message;
-  return;
-}
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  const status=document.getElementById('loginStatus');
 
-const {data:officeAccess,error:officeError}
-  = await supabaseClient.rpc('can_access_office_now');
+  status.className='';
+  status.textContent='Signing in…';
 
-if(officeError){
-  await supabaseClient.auth.signOut();
-  status.className='error';
-  status.textContent='Unable to verify office access. Please try again.';
-  return;
-}
+  // 1. Authenticate email + password
+  const {data:auth,error}=await supabaseClient.auth
+    .signInWithPassword({email,password});
 
-const office=Array.isArray(officeAccess)
-  ? officeAccess[0]
-  : officeAccess;
+  if(error){
+    status.className='error';
+    status.textContent=error.message;
+    return;
+  }
 
-if(office && !office.allowed){
-  await supabaseClient.auth.signOut();
+  // 2. Check official office-hours access
+  const {data:officeAccess,error:officeError}
+    =await supabaseClient.rpc('can_access_office_now');
 
-  status.className='error';
-  status.textContent=
-    'OFFICE CLOSED — Muda rasmi wa ofisi umekwisha. Tafadhali fanya kazi zako kwa wakati.';
+  if(officeError){
+    await supabaseClient.auth.signOut();
 
-  return;
-}
+    status.className='error';
+    status.textContent=
+      'Unable to verify office access. Please try again.';
 
-if(officeError){
-  await supabaseClient.auth.signOut();
-  status.className='error';
-  status.textContent='Unable to verify office access. Please try again.';
-  return;
-}
+    return;
+  }
 
-const office = Array.isArray(officeAccess)
-  ? officeAccess[0]
-  : officeAccess;
+  const office=Array.isArray(officeAccess)
+    ? officeAccess[0]
+    : officeAccess;
 
-if(office && !office.allowed){
-  await supabaseClient.auth.signOut();
+  // 3. Stop normal staff from logging in after closing time
+  if(office && !office.allowed){
 
-  status.className='error';
-  status.textContent =
-    'OFFICE CLOSED — Muda rasmi wa ofisi umekwisha. Tafadhali fanya kazi zako kwa wakati.';
+    await supabaseClient.auth.signOut();
 
-  return;
-}sessionStorage.setItem('nebrinStaffAuthenticated','true');const {data:p}=await supabaseClient.from('admin_users').select('*').eq('user_id',auth.user.id).maybeSingle();if(p&&p.approval_status==='Approved'&&p.is_active){location.href=window.nebrinDashboardForProfile?.(p)||'staff-room.html';return;}await showDashboard();});
+    sessionStorage.removeItem(
+      'nebrinStaffAuthenticated'
+    );
+
+    status.className='error';
+
+    status.textContent=
+      'OFFICE CLOSED — Muda rasmi wa ofisi umekwisha. Tafadhali fanya kazi zako kwa wakati.';
+
+    return;
+  }
+
+  // 4. Authentication + office access successful
+  sessionStorage.setItem(
+    'nebrinStaffAuthenticated',
+    'true'
+  );
+
+  // 5. Load approved NEBRIN staff profile
+  const {data:p,error:profileError}
+    =await supabaseClient
+      .from('admin_users')
+      .select('*')
+      .eq('user_id',auth.user.id)
+      .maybeSingle();
+
+  if(profileError || !p){
+
+    sessionStorage.removeItem(
+      'nebrinStaffAuthenticated'
+    );
+
+    await supabaseClient.auth.signOut();
+
+    status.className='error';
+    status.textContent=
+      'Staff profile could not be verified.';
+
+    return;
+  }
+
+  // 6. Account must be approved and active
+  if(
+    p.approval_status!=='Approved' ||
+    !p.is_active
+  ){
+
+    sessionStorage.removeItem(
+      'nebrinStaffAuthenticated'
+    );
+
+    await supabaseClient.auth.signOut();
+
+    status.className='error';
+    status.textContent=
+      'Your NEBRIN staff account is not approved or active.';
+
+    return;
+  }
+
+  status.className='success';
+  status.textContent='Access granted. Opening office…';
+
+  // 7. Send staff to their correct dashboard
+  location.href=
+    window.nebrinDashboardForProfile?.(p)
+    ||'staff-room.html';
+
+});
 document.getElementById('logoutBtn').addEventListener('click',async()=>{sessionStorage.removeItem('nebrinStaffAuthenticated');await supabaseClient.auth.signOut();location.reload();});
 document.getElementById('refreshBtn').addEventListener('click',loadApplications);
 document.getElementById('searchBox').addEventListener('input',render);
