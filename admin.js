@@ -782,18 +782,23 @@ async function loadPaymentBillCount(){
 /*
 ====================================================
         NEBRIN - HIRE EMPLOYEE
-        HR EMPLOYMENT + SALARY + PAYMENT
+        JOB + CONTRACT + SALARY + PAYMENT
 ====================================================
 */
 
 (function initNebrinHireEmployee(){
 
+  let jobCatalog = [];
+
   function start(){
 
-    const panel = document.getElementById('staffInvitePanel');
+    const panel =
+      document.getElementById('staffInvitePanel');
 
     if(!panel){
-      console.warn('NEBRIN: staffInvitePanel not found');
+      console.warn(
+        'NEBRIN: staffInvitePanel not found'
+      );
       return;
     }
 
@@ -801,8 +806,9 @@ async function loadPaymentBillCount(){
       <h2>Hire Employee</h2>
 
       <p>
-        Create a NEBRIN staff account, assign employment details,
-        salary and payment information.
+        Create a NEBRIN staff account,
+        assign job, employment, salary,
+        contract and payment information.
       </p>
 
       <div class="service-form-grid">
@@ -838,96 +844,101 @@ async function loadPaymentBillCount(){
         </label>
 
         <label>
-          Role
-          <select id="hireRole">
-            <option value="">Choose role</option>
-
-            <option value="Manager">Manager</option>
-            <option value="Secretary">Secretary</option>
-            <option value="Customer Care">Customer Care</option>
-            <option value="HR">HR</option>
-
-            <option value="Accountant">Accountant</option>
-            <option value="Finance Officer">Finance Officer</option>
-
-            <option value="Business Officer">Business Officer</option>
-            <option value="Legal Officer">Legal Officer</option>
-            <option value="Registration Officer">Registration Officer</option>
-
-            <option value="Sales Field Manager">Sales Field Manager</option>
-            <option value="Field Supervisor">Field Supervisor</option>
-            <option value="Team Leader">Team Leader</option>
-
-            <option value="Lipa Agent">Lipa Agent</option>
-            <option value="SIM Registration Agent">SIM Registration Agent</option>
-
-            <option value="Graphic Designer">Graphic Designer</option>
-            <option value="Printing Officer">Printing Officer</option>
-
-            <option value="IT Officer">IT Officer</option>
-            <option value="System Administrator">System Administrator</option>
-
-            <option value="Registry Officer">Registry Officer</option>
-            <option value="Records Officer">Records Officer</option>
-            <option value="Security Officer">Security Officer</option>
-
-            <option value="Staff">Staff</option>
+          Job Title
+          <select id="hireJobTitle">
+            <option value="">
+              Loading jobs...
+            </option>
           </select>
+        </label>
+
+        <label>
+          Role
+          <input
+            id="hireRole"
+            type="text"
+            placeholder="Auto-filled from job title"
+            readonly
+          >
         </label>
 
         <label>
           Department
-          <select id="hireDepartment">
-            <option value="">Choose department</option>
-
-            <option value="Management">Management</option>
-            <option value="Human Resources">Human Resources</option>
-            <option value="Finance">Finance</option>
-
-            <option value="Business & Entrepreneurship">
-              Business & Entrepreneurship
-            </option>
-
-            <option value="Registration & Government Services">
-              Registration & Government Services
-            </option>
-
-            <option value="Sales & Field Operations">
-              Sales & Field Operations
-            </option>
-
-            <option value="Customer Care">Customer Care</option>
-            <option value="Graphics">Graphics</option>
-            <option value="Digital Services">Digital Services</option>
-            <option value="IT">IT</option>
-
-            <option value="Registry & Records">
-              Registry & Records
-            </option>
-
-            <option value="Security">Security</option>
-          </select>
+          <input
+            id="hireDepartment"
+            type="text"
+            placeholder="Auto-filled from job title"
+            readonly
+          >
         </label>
 
         <label>
-          Job Title
+          Salary Grade
           <input
-            id="hireJobTitle"
+            id="hireSalaryGrade"
             type="text"
-            placeholder="e.g. Accountant"
+            placeholder="Auto-filled"
+            readonly
           >
         </label>
 
         <label>
           Employment Type
           <select id="hireEmploymentType">
-            <option value="Permanent">Permanent</option>
-            <option value="Contract">Contract</option>
-            <option value="Temporary">Temporary</option>
-            <option value="Part Time">Part Time</option>
-            <option value="Internship">Internship</option>
+            <option value="Permanent">
+              Permanent
+            </option>
+
+            <option value="Contract">
+              Contract
+            </option>
+
+            <option value="Temporary">
+              Temporary
+            </option>
+
+            <option value="Part Time">
+              Part Time
+            </option>
+
+            <option value="Internship">
+              Internship
+            </option>
           </select>
         </label>
+
+      </div>
+
+
+      <div
+        id="hireContractFields"
+        class="service-form-grid hidden"
+        style="margin-top:16px"
+      >
+
+        <label>
+          Contract Start Date
+          <input
+            id="hireContractStartDate"
+            type="date"
+          >
+        </label>
+
+        <label>
+          Contract End Date
+          <input
+            id="hireContractEndDate"
+            type="date"
+          >
+        </label>
+
+      </div>
+
+
+      <div
+        class="service-form-grid"
+        style="margin-top:16px"
+      >
 
         <label>
           Basic Salary (TZS)
@@ -943,17 +954,34 @@ async function loadPaymentBillCount(){
         <label>
           Employment Status
           <select id="hireEmploymentStatus">
-            <option value="Active">Active</option>
-            <option value="Probation">Probation</option>
+
+            <option value="Active">
+              Active
+            </option>
+
+            <option value="Probation">
+              Probation
+            </option>
+
           </select>
         </label>
 
         <label>
           Payment Method
           <select id="hirePaymentMethod">
-            <option value="">Choose payment method</option>
-            <option value="BANK">Bank Account</option>
-            <option value="MOBILE_MONEY">Mobile Money</option>
+
+            <option value="">
+              Choose payment method
+            </option>
+
+            <option value="BANK">
+              Bank Account
+            </option>
+
+            <option value="MOBILE_MONEY">
+              Mobile Money
+            </option>
+
           </select>
         </label>
 
@@ -1005,11 +1033,27 @@ async function loadPaymentBillCount(){
         <label>
           Mobile Network
           <select id="hireMobileNetwork">
-            <option value="">Choose network</option>
-            <option value="M-Pesa">M-Pesa</option>
-            <option value="Mixx by Yas">Mixx by Yas</option>
-            <option value="Airtel Money">Airtel Money</option>
-            <option value="HaloPesa">HaloPesa</option>
+
+            <option value="">
+              Choose network
+            </option>
+
+            <option value="M-Pesa">
+              M-Pesa
+            </option>
+
+            <option value="Mixx by Yas">
+              Mixx by Yas
+            </option>
+
+            <option value="Airtel Money">
+              Airtel Money
+            </option>
+
+            <option value="HaloPesa">
+              HaloPesa
+            </option>
+
           </select>
         </label>
 
@@ -1036,7 +1080,14 @@ async function loadPaymentBillCount(){
 
       <div style="margin-top:18px">
 
-        <label style="display:flex;align-items:center;gap:10px">
+        <label
+          style="
+            display:flex;
+            align-items:center;
+            gap:10px
+          "
+        >
+
           <input
             id="hireCertificateRequired"
             type="checkbox"
@@ -1044,10 +1095,12 @@ async function loadPaymentBillCount(){
           >
 
           Certificate required for this position
+
         </label>
 
         <small>
-          Leave unchecked when certificates are not required.
+          Leave unchecked when certificates
+          are not required.
         </small>
 
       </div>
@@ -1076,13 +1129,28 @@ async function loadPaymentBillCount(){
     `;
 
 
-    const paymentMethod =
-      document.getElementById('hirePaymentMethod');
+    document
+      .getElementById('hirePaymentMethod')
+      ?.addEventListener(
+        'change',
+        updatePaymentFields
+      );
 
-    paymentMethod?.addEventListener(
-      'change',
-      updatePaymentFields
-    );
+
+    document
+      .getElementById('hireEmploymentType')
+      ?.addEventListener(
+        'change',
+        updateContractFields
+      );
+
+
+    document
+      .getElementById('hireJobTitle')
+      ?.addEventListener(
+        'change',
+        updateJobDetails
+      );
 
 
     document
@@ -1091,88 +1159,414 @@ async function loadPaymentBillCount(){
         'click',
         hireEmployee
       );
+
+
+    loadJobCatalog();
+
+    updateContractFields();
+
+    updatePaymentFields();
+  }
+
+
+  async function loadJobCatalog(){
+
+    const jobSelect =
+      document.getElementById(
+        'hireJobTitle'
+      );
+
+    const status =
+      document.getElementById(
+        'hireEmployeeStatus'
+      );
+
+    if(!jobSelect){
+      return;
+    }
+
+    try{
+
+      const {
+        data,
+        error
+      } = await supabaseClient
+        .from('job_catalog')
+        .select(
+          `
+          id,
+          job_title,
+          role,
+          department,
+          salary_grade,
+          default_salary
+          `
+        )
+        .eq('is_active', true)
+        .order('job_title');
+
+
+      if(error){
+        throw error;
+      }
+
+
+      jobCatalog = data || [];
+
+
+      jobSelect.innerHTML = `
+        <option value="">
+          Choose job title
+        </option>
+      `;
+
+
+      jobCatalog.forEach(job => {
+
+        const option =
+          document.createElement(
+            'option'
+          );
+
+        option.value =
+          job.id;
+
+        option.textContent =
+          job.job_title;
+
+        jobSelect.appendChild(
+          option
+        );
+      });
+
+
+    }catch(err){
+
+      console.error(
+        'NEBRIN job catalog error:',
+        err
+      );
+
+      jobSelect.innerHTML = `
+        <option value="">
+          Unable to load jobs
+        </option>
+      `;
+
+      if(status){
+
+        status.className =
+          'error';
+
+        status.textContent =
+          'Unable to load Job Catalog.';
+
+      }
+    }
+  }
+
+
+  function getSelectedJob(){
+
+    const jobId =
+      document
+        .getElementById(
+          'hireJobTitle'
+        )
+        ?.value;
+
+    if(!jobId){
+      return null;
+    }
+
+    return (
+      jobCatalog.find(
+        job => job.id === jobId
+      ) || null
+    );
+  }
+
+
+  function updateJobDetails(){
+
+    const job =
+      getSelectedJob();
+
+
+    const roleInput =
+      document.getElementById(
+        'hireRole'
+      );
+
+    const departmentInput =
+      document.getElementById(
+        'hireDepartment'
+      );
+
+    const gradeInput =
+      document.getElementById(
+        'hireSalaryGrade'
+      );
+
+    const salaryInput =
+      document.getElementById(
+        'hireBasicSalary'
+      );
+
+
+    if(!job){
+
+      if(roleInput){
+        roleInput.value = '';
+      }
+
+      if(departmentInput){
+        departmentInput.value = '';
+      }
+
+      if(gradeInput){
+        gradeInput.value = '';
+      }
+
+      return;
+    }
+
+
+    if(roleInput){
+
+      roleInput.value =
+        job.role || '';
+
+    }
+
+
+    if(departmentInput){
+
+      departmentInput.value =
+        job.department || '';
+
+    }
+
+
+    if(gradeInput){
+
+      gradeInput.value =
+        job.salary_grade || '';
+
+    }
+
+
+    const defaultSalary =
+      Number(
+        job.default_salary || 0
+      );
+
+
+    if(
+      salaryInput &&
+      defaultSalary > 0
+    ){
+
+      salaryInput.value =
+        String(defaultSalary);
+
+    }
+  }
+
+
+  function updateContractFields(){
+
+    const employmentType =
+      document
+        .getElementById(
+          'hireEmploymentType'
+        )
+        ?.value;
+
+
+    const contractFields =
+      document.getElementById(
+        'hireContractFields'
+      );
+
+
+    contractFields
+      ?.classList
+      .toggle(
+        'hidden',
+        employmentType !== 'Contract'
+      );
   }
 
 
   function updatePaymentFields(){
 
     const method =
-      document.getElementById('hirePaymentMethod')?.value;
+      document
+        .getElementById(
+          'hirePaymentMethod'
+        )
+        ?.value;
+
 
     const bankFields =
-      document.getElementById('hireBankFields');
+      document.getElementById(
+        'hireBankFields'
+      );
+
 
     const mobileFields =
-      document.getElementById('hireMobileFields');
+      document.getElementById(
+        'hireMobileFields'
+      );
 
 
-    bankFields?.classList.toggle(
-      'hidden',
-      method !== 'BANK'
-    );
+    bankFields
+      ?.classList
+      .toggle(
+        'hidden',
+        method !== 'BANK'
+      );
 
-    mobileFields?.classList.toggle(
-      'hidden',
-      method !== 'MOBILE_MONEY'
-    );
+
+    mobileFields
+      ?.classList
+      .toggle(
+        'hidden',
+        method !== 'MOBILE_MONEY'
+      );
   }
 
 
   function value(id){
 
     return (
-      document.getElementById(id)?.value || ''
+      document
+        .getElementById(id)
+        ?.value || ''
     ).trim();
   }
 
 
   async function hireEmployee(){
 
-    const fullName = value('hireFullName');
-    const email = value('hireEmail').toLowerCase();
-    const phone = value('hirePhone');
-    const role = value('hireRole');
-    const department = value('hireDepartment');
+    const fullName =
+      value('hireFullName');
 
-    const jobTitle = value('hireJobTitle');
+
+    const email =
+      value('hireEmail')
+        .toLowerCase();
+
+
+    const phone =
+      value('hirePhone');
+
+
+    const job =
+      getSelectedJob();
+
+
+    const jobCatalogId =
+      job?.id || null;
+
+
+    const jobTitle =
+      job?.job_title || '';
+
+
+    const role =
+      job?.role || '';
+
+
+    const department =
+      job?.department || '';
+
+
+    const salaryGrade =
+      job?.salary_grade || null;
+
 
     const employmentType =
-      value('hireEmploymentType') || 'Permanent';
+      value(
+        'hireEmploymentType'
+      ) || 'Permanent';
+
+
+    const contractStartDate =
+      value(
+        'hireContractStartDate'
+      );
+
+
+    const contractEndDate =
+      value(
+        'hireContractEndDate'
+      );
+
 
     const employmentStatus =
-      value('hireEmploymentStatus') || 'Active';
+      value(
+        'hireEmploymentStatus'
+      ) || 'Active';
+
 
     const basicSalary =
-      Number(value('hireBasicSalary') || 0);
+      Number(
+        value(
+          'hireBasicSalary'
+        ) || 0
+      );
+
 
     const paymentMethod =
-      value('hirePaymentMethod');
+      value(
+        'hirePaymentMethod'
+      );
 
 
     const certificateRequired =
-      document.getElementById(
-        'hireCertificateRequired'
-      )?.checked === true;
+      document
+        .getElementById(
+          'hireCertificateRequired'
+        )
+        ?.checked === true;
 
 
     const bankName =
-      value('hireBankName');
+      value(
+        'hireBankName'
+      );
+
 
     const bankAccountName =
-      value('hireBankAccountName');
+      value(
+        'hireBankAccountName'
+      );
+
 
     const bankAccountNumber =
-      value('hireBankAccountNumber');
+      value(
+        'hireBankAccountNumber'
+      );
 
 
     const mobileNetwork =
-      value('hireMobileNetwork');
+      value(
+        'hireMobileNetwork'
+      );
+
 
     const mobileAccountName =
-      value('hireMobileAccountName');
+      value(
+        'hireMobileAccountName'
+      );
+
 
     const mobileNumber =
-      value('hireMobileNumber');
+      value(
+        'hireMobileNumber'
+      );
 
 
     const status =
@@ -1180,10 +1574,12 @@ async function loadPaymentBillCount(){
         'hireEmployeeStatus'
       );
 
+
     const result =
       document.getElementById(
         'hireEmployeeResult'
       );
+
 
     const button =
       document.getElementById(
@@ -1194,24 +1590,70 @@ async function loadPaymentBillCount(){
     if(
       !fullName ||
       !email ||
+      !job ||
+      !jobTitle ||
       !role ||
-      !department ||
-      !jobTitle
+      !department
     ){
-      status.className = 'error';
+
+      status.className =
+        'error';
 
       status.textContent =
-        'Full name, email, role, department and job title are required.';
+        'Full name, email and job title are required.';
 
       return;
     }
 
 
     if(
-      !Number.isFinite(basicSalary) ||
+      employmentType === 'Contract'
+    ){
+
+      if(
+        !contractStartDate ||
+        !contractEndDate
+      ){
+
+        status.className =
+          'error';
+
+        status.textContent =
+          'Contract start date and end date are required.';
+
+        return;
+      }
+
+
+      if(
+        new Date(
+          contractEndDate
+        ) <=
+        new Date(
+          contractStartDate
+        )
+      ){
+
+        status.className =
+          'error';
+
+        status.textContent =
+          'Contract end date must be after contract start date.';
+
+        return;
+      }
+    }
+
+
+    if(
+      !Number.isFinite(
+        basicSalary
+      ) ||
       basicSalary < 0
     ){
-      status.className = 'error';
+
+      status.className =
+        'error';
 
       status.textContent =
         'Enter a valid basic salary.';
@@ -1222,7 +1664,8 @@ async function loadPaymentBillCount(){
 
     if(!paymentMethod){
 
-      status.className = 'error';
+      status.className =
+        'error';
 
       status.textContent =
         'Choose employee payment method.';
@@ -1239,7 +1682,9 @@ async function loadPaymentBillCount(){
         !bankAccountNumber
       )
     ){
-      status.className = 'error';
+
+      status.className =
+        'error';
 
       status.textContent =
         'Complete the employee bank account details.';
@@ -1249,14 +1694,17 @@ async function loadPaymentBillCount(){
 
 
     if(
-      paymentMethod === 'MOBILE_MONEY' &&
+      paymentMethod ===
+      'MOBILE_MONEY' &&
       (
         !mobileNetwork ||
         !mobileAccountName ||
         !mobileNumber
       )
     ){
-      status.className = 'error';
+
+      status.className =
+        'error';
 
       status.textContent =
         'Complete the employee mobile money details.';
@@ -1267,33 +1715,78 @@ async function loadPaymentBillCount(){
 
     try{
 
-      button.disabled = true;
+      button.disabled =
+        true;
 
-      status.className = '';
+
+      status.className =
+        '';
+
 
       status.textContent =
         'Creating NEBRIN employee account...';
 
-      result?.classList.add('hidden');
+
+      result
+        ?.classList
+        .add('hidden');
 
 
       const payload = {
 
-        full_name: fullName,
+        full_name:
+          fullName,
+
         email,
-        phone: phone || null,
+
+        phone:
+          phone || null,
+
+
+        job_catalog_id:
+          jobCatalogId,
+
+        job_title:
+          jobTitle,
 
         role,
+
         department,
 
-        job_title: jobTitle,
-        employment_type: employmentType,
-        employment_status: employmentStatus,
+        salary_grade:
+          salaryGrade,
 
-        basic_salary: basicSalary,
-        currency: 'TZS',
 
-        payment_method: paymentMethod,
+        employment_type:
+          employmentType,
+
+        employment_status:
+          employmentStatus,
+
+
+        contract_start_date:
+          employmentType ===
+          'Contract'
+            ? contractStartDate
+            : null,
+
+        contract_end_date:
+          employmentType ===
+          'Contract'
+            ? contractEndDate
+            : null,
+
+
+        basic_salary:
+          basicSalary,
+
+        currency:
+          'TZS',
+
+
+        payment_method:
+          paymentMethod,
+
 
         bank_name:
           paymentMethod === 'BANK'
@@ -1310,33 +1803,43 @@ async function loadPaymentBillCount(){
             ? bankAccountNumber
             : null,
 
+
         mobile_network:
-          paymentMethod === 'MOBILE_MONEY'
+          paymentMethod ===
+          'MOBILE_MONEY'
             ? mobileNetwork
             : null,
 
         mobile_account_name:
-          paymentMethod === 'MOBILE_MONEY'
+          paymentMethod ===
+          'MOBILE_MONEY'
             ? mobileAccountName
             : null,
 
         mobile_number:
-          paymentMethod === 'MOBILE_MONEY'
+          paymentMethod ===
+          'MOBILE_MONEY'
             ? mobileNumber
             : null,
+
 
         certificate_required:
           certificateRequired
       };
 
 
-      const { data, error } =
-        await supabaseClient.functions.invoke(
-          'hire-employee',
-          {
-            body: payload
-          }
-        );
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .functions
+          .invoke(
+            'hire-employee',
+            {
+              body: payload
+            }
+          );
 
 
       if(error){
@@ -1353,7 +1856,9 @@ async function loadPaymentBillCount(){
       }
 
 
-      status.className = 'success';
+      status.className =
+        'success';
+
 
       status.textContent =
         'Employee hired successfully.';
@@ -1361,82 +1866,174 @@ async function loadPaymentBillCount(){
 
       if(result){
 
-        result.innerHTML = '';
+        result.innerHTML =
+          '';
+
 
         const title =
-          document.createElement('strong');
+          document.createElement(
+            'strong'
+          );
+
 
         title.textContent =
           '🎉 NEBRIN Employment Successful';
 
-        result.appendChild(title);
+
+        result.appendChild(
+          title
+        );
 
 
         const employeeText =
-          document.createElement('p');
+          document.createElement(
+            'p'
+          );
+
 
         employeeText.textContent =
           fullName +
           ' has been successfully added to the NEBRIN staff system.';
 
-        result.appendChild(employeeText);
+
+        result.appendChild(
+          employeeText
+        );
+
+
+        const jobText =
+          document.createElement(
+            'p'
+          );
+
+
+        jobText.textContent =
+          'Job Title: ' +
+          jobTitle;
+
+
+        result.appendChild(
+          jobText
+        );
 
 
         const roleText =
-          document.createElement('p');
+          document.createElement(
+            'p'
+          );
+
 
         roleText.textContent =
-          'Role: ' + role;
+          'Role: ' +
+          role;
 
-        result.appendChild(roleText);
+
+        result.appendChild(
+          roleText
+        );
 
 
         const departmentText =
-          document.createElement('p');
+          document.createElement(
+            'p'
+          );
+
 
         departmentText.textContent =
-          'Department: ' + department;
+          'Department: ' +
+          department;
 
-        result.appendChild(departmentText);
+
+        result.appendChild(
+          departmentText
+        );
 
 
         const salaryText =
-          document.createElement('p');
+          document.createElement(
+            'p'
+          );
+
 
         salaryText.textContent =
           'Basic Salary: TZS ' +
           basicSalary.toLocaleString();
 
-        result.appendChild(salaryText);
+
+        result.appendChild(
+          salaryText
+        );
+
+
+        if(
+          employmentType ===
+          'Contract'
+        ){
+
+          const contractText =
+            document.createElement(
+              'p'
+            );
+
+
+          contractText.textContent =
+            'Contract: ' +
+            contractStartDate +
+            ' to ' +
+            contractEndDate;
+
+
+          result.appendChild(
+            contractText
+          );
+        }
 
 
         const temporaryPin =
-          data?.onboarding?.temporary_pin;
+          data
+            ?.onboarding
+            ?.temporary_pin;
 
 
         if(temporaryPin){
 
           const pinText =
-            document.createElement('p');
+            document.createElement(
+              'p'
+            );
+
 
           pinText.textContent =
             'Temporary PIN: ' +
             temporaryPin;
 
-          result.appendChild(pinText);
+
+          result.appendChild(
+            pinText
+          );
 
 
           const warning =
-            document.createElement('p');
+            document.createElement(
+              'p'
+            );
+
 
           warning.textContent =
             'The employee must create a private PIN during first login.';
 
-          result.appendChild(warning);
+
+          result.appendChild(
+            warning
+          );
         }
 
 
-        result.classList.remove('hidden');
+        result
+          .classList
+          .remove(
+            'hidden'
+          );
       }
 
 
@@ -1447,21 +2044,29 @@ async function loadPaymentBillCount(){
         err
       );
 
-      status.className = 'error';
+
+      status.className =
+        'error';
+
 
       status.textContent =
         err?.message ||
         'Employee hiring failed. Please try again.';
 
+
     }finally{
 
-      button.disabled = false;
+      button.disabled =
+        false;
 
     }
   }
 
 
-  if(document.readyState === 'loading'){
+  if(
+    document.readyState ===
+    'loading'
+  ){
 
     document.addEventListener(
       'DOMContentLoaded',
