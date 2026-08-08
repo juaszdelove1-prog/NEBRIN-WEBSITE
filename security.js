@@ -58,13 +58,7 @@ setTimeout(async()=>{
 },4000);
 
 return;
-        setTimeout(async()=>{
-  await supabaseClient.auth.signOut();
-  location.href='admin.html?reason=office_closed';
-},4000);
-
-return;
-}
+        
 
 }catch(e){
   console.error('NEBRIN security guard:',e)
