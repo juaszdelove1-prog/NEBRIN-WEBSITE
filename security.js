@@ -63,4 +63,4 @@ return;
     }catch(e){console.error('NEBRIN security guard:',e)}
   }
   setTimeout(enforce,150);
-})();
+setInterval(enforce,60000);
