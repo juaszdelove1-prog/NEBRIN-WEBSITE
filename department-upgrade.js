@@ -199,7 +199,101 @@ const HR_NAVIGATION={
 
 };
 
+/* ============================================================
+   DIRECT DEPARTMENT NAVIGATION
+   ============================================================ */
 
+window.NEBRIN_DEPT_NAV=function(module,section,button){
+
+  try{
+
+    /* Highlight selected menu */
+    const nav=button?.closest('.neb-pro-nav');
+
+    if(nav){
+      nav.querySelectorAll(
+        'button[data-dept-nav]'
+      ).forEach(btn=>{
+        btn.classList.remove('active');
+      });
+
+      button.classList.add('active');
+    }
+
+
+    /* ===========================
+       HR ROUTES
+       =========================== */
+
+    if(module==='hr'){
+
+      if(section==='Overview'){
+        NEBMOD.hrOverview();
+      }
+
+      else if(section==='Recruitment'){
+        NEBMOD.hrRecruitment();
+      }
+
+      else if(section==='Employees'){
+        NEBMOD.hrEmployees();
+      }
+
+      else if(section==='Leave'){
+        NEBMOD.hrLeave();
+      }
+
+      else if(section==='Discipline'){
+        NEBMOD.hrDiscipline();
+      }
+
+      else if(section==='Onboarding'){
+        NEBMOD.hrOnboarding();
+      }
+
+      else{
+        console.warn(
+          'Unknown HR section:',
+          section
+        );
+
+        return;
+      }
+
+
+      /* Move directly to HR workspace */
+      const modMain=
+        document.getElementById('modMain');
+
+      if(modMain){
+
+        setTimeout(()=>{
+
+          modMain.scrollIntoView({
+            behavior:'smooth',
+            block:'start'
+          });
+
+        },50);
+
+      }
+
+    }
+
+  }catch(error){
+
+    console.error(
+      'NEBRIN Department Navigation:',
+      error
+    );
+
+    alert(
+      'Unable to open this section.'
+    );
+
+  }
+
+};
 /* ============================================================
    SET ACTIVE NAVIGATION BUTTON
    ============================================================ */
@@ -479,25 +573,34 @@ function transformDepartment(){
    <nav class="neb-pro-nav">
 
      ${
-       meta.nav.map(
-         (name,index)=>`
+  meta.nav.map(
+    (name,index)=>`
 
-           <button
-             type="button"
-             data-dept-nav="${NEBUI.escape(name)}"
-             class="${
-               index===0
-               ?'active'
-               :''
-             }"
-           >
-             ${NEBUI.escape(name)}
-           </button>
+      <button
+        type="button"
 
-         `
-       ).join('')
-     }
+        data-dept-nav="${NEBUI.escape(name)}"
 
+        class="${
+          index===0
+          ?'active'
+          :''
+        }"
+
+        onclick="NEBRIN_DEPT_NAV(
+          '${module}',
+          '${NEBUI.escape(name)}',
+          this
+        )"
+      >
+
+        ${NEBUI.escape(name)}
+
+      </button>
+
+    `
+  ).join('')
+}
 
      <a
        href="staff-room.html"
