@@ -95,12 +95,1430 @@ NEBMOD.registry=async()=>{
  $('modMain').innerHTML=`<div class="neb-grid-2"><article class="neb-card"><h2>Records, Archives & File Tracking</h2><p>Incoming, outgoing and internal documents; reference/file numbers; physical archive location; retention; confidential records and complete movement history.</p>${r.map(x=>row(x.file_number,`${x.subject} · ${x.classification} · ${x.status}`)).join('')||'<p>No registry records.</p>'}</article><article class="neb-card"><div class="neb-section-title"><h2>Library, Books, Journals & Publications</h2><button onclick="NEBMOD.newPublication()">Add Publication</button></div>${p.map(x=>row(x.title,`${x.publication_type} · ${x.is_public?'Published on Website':'Internal'}`)).join('')||'<p>No publications.</p>'}</article></div>`;
 };
 NEBMOD.newPublication=async()=>{const title=prompt('Title:');if(!title)return;const type=prompt('Type: Book / Journal / Magazine / Report','Book');const is_public=confirm('Display this publication on the public website?');const {error}=await supabaseClient.from('library_publications').insert({title,publication_type:type,is_public,created_by:NEBRIN.profile.user_id});if(error)alert(error.message);else NEBMOD.registry()};
+/* ============================================================
+   NEBRIN HR FINAL UPGRADE
+   PHASE 1C
+   HR MASTER DIRECTORY + FUNCTIONAL HR WORKSPACE
+   ============================================================ */
+
+NEBMOD.hrState={
+ employees:[],
+ leave:[],
+ discipline:[],
+ recruitment:[],
+ currentView:'overview'
+};
 
 NEBMOD.hr=async()=>{
- const [emp,leave,discipline,recruit]=await Promise.all([supabaseClient.from('employees').select('*').order('created_at',{ascending:false}).limit(200),supabaseClient.from('leave_requests').select('*').order('created_at',{ascending:false}).limit(150),supabaseClient.from('time_discipline_cases').select('*').order('created_at',{ascending:false}).limit(100),supabaseClient.from('hr_recruitment_cases').select('*').order('created_at',{ascending:false}).limit(100)]);
- const e=emp.data||[],l=leave.data||[],d=discipline.data||[],r=recruit.data||[];
- $('modStats').innerHTML=[['Employees',e.length],['Leave Pending',l.filter(x=>x.status==='Pending').length],['Recruitment',r.filter(x=>!['Hired','Closed','Rejected'].includes(x.status)).length],['Discipline',d.filter(x=>x.status==='Open').length],['Contracts Review',e.filter(x=>x.contract_end&&new Date(x.contract_end)<new Date(Date.now()+30*86400000)).length],['Onboarding',e.filter(x=>x.status==='Pending Approval').length]].map(x=>`<div class="neb-stat"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join('');
- $('modMain').innerHTML=`<div class="neb-grid-2"><article class="neb-card"><h2>Recruitment & Employee Lifecycle</h2><p>Secretary → HR → Manager → CEO recruitment flow, interviews, onboarding, contracts, transfers, promotions, resignations and terminations.</p>${r.map(x=>row(x.reference,`${x.applicant_name} · ${x.position} · ${x.status}`)).join('')||'<p>No recruitment cases.</p>'}</article><article class="neb-card"><h2>Leave, Permission & Employee Relations</h2>${l.map(x=>row(x.request_type,`${x.status} · ${NEBRIN.fmt(x.created_at)}`)).join('')||'<p>No leave requests.</p>'}</article><article class="neb-card"><h2>Discipline & Time Management</h2>${d.map(x=>row(x.case_type,`${x.stage} · ${x.status}`)).join('')||'<p>No discipline cases.</p>'}</article><article class="neb-card"><h2>Onboarding & Documents</h2><a class="btn btn-primary" href="hr-onboarding.html">Open Full HR Onboarding</a><p>Professional certificates, identity documents and employee records remain controlled by HR permissions.</p></article></div>`;
+
+ const [
+   emp,
+   leave,
+   discipline,
+   recruit
+ ]=await Promise.all([
+
+   supabaseClient
+     .from('hr_employee_master')
+     .select('*')
+     .order('employee_number',{ascending:true}),
+
+   supabaseClient
+     .from('leave_requests')
+     .select('*')
+     .order('created_at',{ascending:false})
+     .limit(150),
+
+   supabaseClient
+     .from('time_discipline_cases')
+     .select('*')
+     .order('created_at',{ascending:false})
+     .limit(100),
+
+   supabaseClient
+     .from('hr_recruitment_cases')
+     .select('*')
+     .order('created_at',{ascending:false})
+     .limit(100)
+
+ ]);
+
+
+ if(emp.error){
+   console.error('HR employee master error:',emp.error);
+ }
+
+ if(leave.error){
+   console.error('HR leave error:',leave.error);
+ }
+
+ if(discipline.error){
+   console.error(
+     'HR discipline error:',
+     discipline.error
+   );
+ }
+
+ if(recruit.error){
+   console.error(
+     'HR recruitment error:',
+     recruit.error
+   );
+ }
+
+
+ const e=emp.data||[];
+ const l=leave.data||[];
+ const d=discipline.data||[];
+ const r=recruit.data||[];
+
+
+ NEBMOD.hrState.employees=e;
+ NEBMOD.hrState.leave=l;
+ NEBMOD.hrState.discipline=d;
+ NEBMOD.hrState.recruitment=r;
+
+
+ const now=new Date();
+
+ const thirtyDays=
+   new Date(
+     Date.now()+
+     30*24*60*60*1000
+   );
+
+
+ const contractsReview=e.filter(x=>{
+
+   if(
+     !x.contract_end_date ||
+     x.employment_status==='Terminated'
+   ){
+     return false;
+   }
+
+   const end=
+     new Date(x.contract_end_date);
+
+   return (
+     end>=now &&
+     end<=thirtyDays
+   );
+
+ }).length;
+
+
+ const onboardingPending=e.filter(x=>{
+
+   return (
+     x.onboarding_status &&
+     ![
+       'Completed',
+       'Approved',
+       'Onboarding Completed'
+     ].includes(x.onboarding_status)
+   );
+
+ }).length;
+
+
+ $('modStats').innerHTML=[
+
+   [
+     'Employees',
+     e.filter(x=>
+       x.is_active!==false &&
+       x.employment_status!=='Terminated'
+     ).length
+   ],
+
+   [
+     'Leave Pending',
+     l.filter(x=>
+       x.status==='Pending'
+     ).length
+   ],
+
+   [
+     'Recruitment',
+     r.filter(x=>
+       ![
+         'Hired',
+         'Closed',
+         'Rejected'
+       ].includes(x.status)
+     ).length
+   ],
+
+   [
+     'Discipline',
+     d.filter(x=>
+       x.status==='Open'
+     ).length
+   ],
+
+   [
+     'Contracts Review',
+     contractsReview
+   ],
+
+   [
+     'Onboarding',
+     onboardingPending
+   ]
+
+ ].map(x=>`
+
+   <div class="neb-stat">
+     <span>${NEBRIN.esc(x[0])}</span>
+     <strong>${NEBRIN.esc(x[1])}</strong>
+   </div>
+
+ `).join('');
+
+
+ NEBMOD.hrOverview();
+
+};
+
+
+/* ============================================================
+   HR MAIN OVERVIEW
+   ============================================================ */
+
+NEBMOD.hrOverview=()=>{
+
+ NEBMOD.hrState.currentView='overview';
+
+ const e=
+   NEBMOD.hrState.employees||[];
+
+ const l=
+   NEBMOD.hrState.leave||[];
+
+ const d=
+   NEBMOD.hrState.discipline||[];
+
+ const r=
+   NEBMOD.hrState.recruitment||[];
+
+
+ $('modMain').innerHTML=`
+
+ <article class="neb-card">
+
+   <div class="neb-section-title">
+
+     <div>
+       <p class="section-label">
+         HR CONTROL CENTRE
+       </p>
+
+       <h2>
+         Human Resources Operations
+       </h2>
+     </div>
+
+   </div>
+
+   <p>
+     Recruitment, employee records,
+     onboarding, contracts, leave,
+     discipline and complete employee
+     lifecycle management.
+   </p>
+
+   <div class="neb-actions">
+
+     <button
+       class="btn btn-primary"
+       onclick="NEBMOD.hrEmployees()"
+     >
+       Employees
+     </button>
+
+     <button
+       class="btn btn-secondary-admin"
+       onclick="NEBMOD.hrRecruitment()"
+     >
+       Recruitment
+     </button>
+
+     <button
+       class="btn btn-secondary-admin"
+       onclick="NEBMOD.hrLeave()"
+     >
+       Leave
+     </button>
+
+     <button
+       class="btn btn-secondary-admin"
+       onclick="NEBMOD.hrDiscipline()"
+     >
+       Discipline
+     </button>
+
+     <button
+       class="btn btn-secondary-admin"
+       onclick="NEBMOD.hrOnboarding()"
+     >
+       Onboarding
+     </button>
+
+     <a
+       class="btn btn-secondary-admin"
+       href="staffing-requests.html"
+     >
+       Staffing Requests
+     </a>
+
+   </div>
+
+ </article>
+
+
+ <div class="neb-grid-2">
+
+   <article class="neb-card">
+
+     <div class="neb-section-title">
+
+       <h2>
+         Employee Master Directory
+       </h2>
+
+       <button
+         class="btn btn-primary"
+         onclick="NEBMOD.hrEmployees()"
+       >
+         Open Employees
+       </button>
+
+     </div>
+
+     <p>
+       HR master register containing
+       employees hired by HR, CEO and
+       authorized Management.
+     </p>
+
+     ${
+       e.slice(0,5).map(emp=>
+
+         row(
+           emp.employee_number||
+           'Pending Employee No.',
+
+           `${
+             emp.full_name||''
+           } · ${
+             emp.job_title||
+             emp.role||
+             ''
+           } · ${
+             emp.department||''
+           }`
+         )
+
+       ).join('')||
+       '<p>No employees found.</p>'
+     }
+
+   </article>
+
+
+   <article class="neb-card">
+
+     <div class="neb-section-title">
+
+       <h2>
+         Recruitment & Employee Lifecycle
+       </h2>
+
+       <button
+         class="btn btn-primary"
+         onclick="NEBMOD.hrRecruitment()"
+       >
+         Open Recruitment
+       </button>
+
+     </div>
+
+     <p>
+       Staffing request → vacancy →
+       applications → shortlisting →
+       interview → approval → hiring →
+       onboarding.
+     </p>
+
+     ${
+       r.slice(0,5).map(x=>
+
+         row(
+           x.reference||
+           'Recruitment Case',
+
+           `${
+             x.applicant_name||''
+           } · ${
+             x.position||''
+           } · ${
+             x.status||''
+           }`
+         )
+
+       ).join('')||
+       '<p>No recruitment cases.</p>'
+     }
+
+   </article>
+
+
+   <article class="neb-card">
+
+     <div class="neb-section-title">
+
+       <h2>
+         Leave, Permission &
+         Employee Relations
+       </h2>
+
+       <button
+         onclick="NEBMOD.hrLeave()"
+       >
+         Open Leave
+       </button>
+
+     </div>
+
+     ${
+       l.slice(0,5).map(x=>
+
+         row(
+           x.request_type||
+           'Leave Request',
+
+           `${
+             x.status||''
+           } · ${
+             NEBRIN.fmt(
+               x.created_at
+             )
+           }`
+         )
+
+       ).join('')||
+       '<p>No leave requests.</p>'
+     }
+
+   </article>
+
+
+   <article class="neb-card">
+
+     <div class="neb-section-title">
+
+       <h2>
+         Discipline &
+         Employee Relations
+       </h2>
+
+       <button
+         onclick="NEBMOD.hrDiscipline()"
+       >
+         Open Discipline
+       </button>
+
+     </div>
+
+     ${
+       d.slice(0,5).map(x=>
+
+         row(
+           x.case_type||
+           'Discipline Case',
+
+           `${
+             x.stage||''
+           } · ${
+             x.status||''
+           }`
+         )
+
+       ).join('')||
+       '<p>No discipline cases.</p>'
+     }
+
+   </article>
+
+
+   <article class="neb-card">
+
+     <div class="neb-section-title">
+
+       <h2>
+         Onboarding & Documents
+       </h2>
+
+       <button
+         class="btn btn-primary"
+         onclick="NEBMOD.hrOnboarding()"
+       >
+         Open Onboarding
+       </button>
+
+     </div>
+
+     <p>
+       Employment onboarding,
+       professional certificates,
+       identity documents,
+       personnel records and
+       employee ID management.
+     </p>
+
+   </article>
+
+
+   <article class="neb-card">
+
+     <h2>
+       CEO ↔ HR Hiring Synchronization
+     </h2>
+
+     <p>
+       Employees hired by CEO,
+       HR or authorized Management
+       are synchronized automatically
+       with the HR Master Personnel
+       File.
+     </p>
+
+     ${
+       e.filter(x=>
+         x.hiring_source==='CEO'
+       ).slice(0,5).map(x=>
+
+         row(
+           x.employee_number||
+           'Employee',
+
+           `${
+             x.full_name||''
+           } · Hired by CEO · ${
+             x.department||''
+           }`
+         )
+
+       ).join('')||
+       '<p>No CEO hiring records yet.</p>'
+     }
+
+   </article>
+
+ </div>
+
+ `;
+
+};
+
+
+/* ============================================================
+   EMPLOYEE MASTER DIRECTORY
+   ============================================================ */
+
+NEBMOD.hrEmployees=()=>{
+
+ NEBMOD.hrState.currentView='employees';
+
+ const employees=
+   NEBMOD.hrState.employees||[];
+
+
+ $('modMain').innerHTML=`
+
+ <article class="neb-card">
+
+   <div class="neb-section-title">
+
+     <div>
+       <p class="section-label">
+         HR MASTER REGISTER
+       </p>
+
+       <h2>
+         Employee Directory
+       </h2>
+     </div>
+
+     <button
+       onclick="NEBMOD.hrOverview()"
+     >
+       Back to HR Overview
+     </button>
+
+   </div>
+
+
+   <div class="neb-actions">
+
+     <input
+       id="hrMasterSearch"
+       type="search"
+       placeholder="Search employee, number, job title or department"
+       style="
+         flex:1;
+         min-width:240px;
+         padding:14px;
+         border:1px solid #d8dfeb;
+         border-radius:12px;
+       "
+     >
+
+     <button
+       class="btn btn-primary"
+       onclick="NEBMOD.hrEmployeeSearch()"
+     >
+       Search
+     </button>
+
+     <a
+       class="btn btn-secondary-admin"
+       href="hr-onboarding.html"
+     >
+       Full HR Onboarding
+     </a>
+
+   </div>
+
+
+   <div
+     id="hrMasterEmployeeList"
+     class="neb-panel-list"
+     style="margin-top:20px"
+   >
+     ${NEBMOD.renderHrEmployees(employees)}
+   </div>
+
+ </article>
+
+ `;
+
+};
+
+
+/* ============================================================
+   EMPLOYEE DIRECTORY RENDER
+   ============================================================ */
+
+NEBMOD.renderHrEmployees=employees=>{
+
+ if(!employees.length){
+
+   return `
+     <p>
+       No employees found.
+     </p>
+   `;
+ }
+
+
+ return employees.map(emp=>{
+
+   const contract=
+     emp.contract_end_date
+     ? `Contract ends ${new Date(
+         emp.contract_end_date
+       ).toLocaleDateString()}`
+     : 'No contract end date';
+
+
+   const onboarding=
+     emp.onboarding_status||
+     'No onboarding record';
+
+
+   return `
+
+   <article class="reference-result-card">
+
+     <div class="neb-section-title">
+
+       <div>
+
+         <strong>
+           ${NEBRIN.esc(
+             emp.employee_number||
+             'Pending Employee Number'
+           )}
+           —
+           ${NEBRIN.esc(
+             emp.full_name||
+             'Unnamed Employee'
+           )}
+         </strong>
+
+       </div>
+
+       <span class="neb-tag">
+
+         ${NEBRIN.esc(
+           emp.employment_status||
+           'Active'
+         )}
+
+       </span>
+
+     </div>
+
+
+     <p>
+
+       ${NEBRIN.esc(
+         emp.job_title||
+         emp.role||
+         ''
+       )}
+
+       ·
+
+       ${NEBRIN.esc(
+         emp.department||
+         ''
+       )}
+
+       ·
+
+       ${NEBRIN.esc(
+         emp.employment_type||
+         ''
+       )}
+
+     </p>
+
+
+     <p>
+
+       <strong>Hiring Source:</strong>
+
+       ${NEBRIN.esc(
+         emp.hiring_source||
+         'SYSTEM'
+       )}
+
+       ·
+
+       <strong>Onboarding:</strong>
+
+       ${NEBRIN.esc(
+         onboarding
+       )}
+
+     </p>
+
+
+     <p>
+
+       <strong>Documents:</strong>
+
+       ${NEBRIN.esc(
+         emp.document_count||0
+       )}
+
+       ·
+
+       ${NEBRIN.esc(
+         contract
+       )}
+
+     </p>
+
+
+     <div class="neb-actions">
+
+       <button
+         class="btn btn-secondary-admin"
+         onclick="NEBMOD.hrEmployeeProfile('${emp.user_id}')"
+       >
+         View Personnel File
+       </button>
+
+     </div>
+
+   </article>
+
+   `;
+
+ }).join('');
+
+};
+
+
+/* ============================================================
+   EMPLOYEE SEARCH
+   ============================================================ */
+
+NEBMOD.hrEmployeeSearch=()=>{
+
+ const input=
+   document.getElementById(
+     'hrMasterSearch'
+   );
+
+ const q=
+   String(
+     input?.value||''
+   )
+   .trim()
+   .toLowerCase();
+
+
+ const employees=
+   NEBMOD.hrState.employees||[];
+
+
+ if(!q){
+
+   document.getElementById(
+     'hrMasterEmployeeList'
+   ).innerHTML=
+     NEBMOD.renderHrEmployees(
+       employees
+     );
+
+   return;
+ }
+
+
+ const results=
+   employees.filter(emp=>{
+
+     const text=`
+
+       ${emp.employee_number||''}
+
+       ${emp.full_name||''}
+
+       ${emp.email||''}
+
+       ${emp.phone||''}
+
+       ${emp.job_title||''}
+
+       ${emp.role||''}
+
+       ${emp.department||''}
+
+       ${emp.employment_type||''}
+
+       ${emp.employment_status||''}
+
+     `.toLowerCase();
+
+
+     return text.includes(q);
+
+   });
+
+
+ document.getElementById(
+   'hrMasterEmployeeList'
+ ).innerHTML=
+   NEBMOD.renderHrEmployees(
+     results
+   );
+
+};
+
+
+/* ============================================================
+   EMPLOYEE PERSONNEL FILE
+   ============================================================ */
+
+NEBMOD.hrEmployeeProfile=userId=>{
+
+ const emp=
+   (
+     NEBMOD.hrState.employees||
+     []
+   ).find(x=>
+     x.user_id===userId
+   );
+
+
+ if(!emp){
+   alert(
+     'Employee record not found.'
+   );
+   return;
+ }
+
+
+ const role=
+   NEBRIN.profile?.role||'';
+
+
+ const canSeeSensitive=
+   [
+     'HR',
+     'CEO',
+     'Super Admin',
+     'Manager'
+   ].includes(role);
+
+
+ const money=value=>{
+
+   if(
+     value===null ||
+     value===undefined
+   ){
+     return 'Not set';
+   }
+
+   return new Intl.NumberFormat(
+     'en-TZ'
+   ).format(
+     Number(value||0)
+   );
+
+ };
+
+
+ $('modMain').innerHTML=`
+
+ <article class="neb-card">
+
+   <div class="neb-section-title">
+
+     <div>
+
+       <p class="section-label">
+         CONFIDENTIAL HR PERSONNEL FILE
+       </p>
+
+       <h2>
+         ${NEBRIN.esc(
+           emp.full_name||
+           'Employee'
+         )}
+       </h2>
+
+     </div>
+
+     <button
+       onclick="NEBMOD.hrEmployees()"
+     >
+       Back to Employees
+     </button>
+
+   </div>
+
+
+   <div class="neb-grid-2">
+
+
+     <article class="neb-card">
+
+       <h3>
+         Employment Identity
+       </h3>
+
+       <p>
+         <strong>Employee Number:</strong><br>
+         ${NEBRIN.esc(
+           emp.employee_number||
+           'Pending'
+         )}
+       </p>
+
+       <p>
+         <strong>Role:</strong><br>
+         ${NEBRIN.esc(
+           emp.role||''
+         )}
+       </p>
+
+       <p>
+         <strong>Job Title:</strong><br>
+         ${NEBRIN.esc(
+           emp.job_title||
+           'Not assigned'
+         )}
+       </p>
+
+       <p>
+         <strong>Department:</strong><br>
+         ${NEBRIN.esc(
+           emp.department||
+           ''
+         )}
+       </p>
+
+       <p>
+         <strong>Employment Type:</strong><br>
+         ${NEBRIN.esc(
+           emp.employment_type||
+           ''
+         )}
+       </p>
+
+       <p>
+         <strong>Status:</strong><br>
+         ${NEBRIN.esc(
+           emp.employment_status||
+           ''
+         )}
+       </p>
+
+     </article>
+
+
+     <article class="neb-card">
+
+       <h3>
+         Contact & HR File
+       </h3>
+
+       <p>
+         <strong>Email:</strong><br>
+         ${NEBRIN.esc(
+           emp.email||
+           'Not recorded'
+         )}
+       </p>
+
+       <p>
+         <strong>Phone:</strong><br>
+         ${NEBRIN.esc(
+           emp.phone||
+           'Not recorded'
+         )}
+       </p>
+
+       <p>
+         <strong>Hiring Source:</strong><br>
+         ${NEBRIN.esc(
+           emp.hiring_source||
+           'SYSTEM'
+         )}
+       </p>
+
+       <p>
+         <strong>Personnel File Status:</strong><br>
+         ${NEBRIN.esc(
+           emp.file_status||
+           ''
+         )}
+       </p>
+
+       <p>
+         <strong>Documents:</strong><br>
+         ${NEBRIN.esc(
+           emp.document_count||0
+         )}
+       </p>
+
+       <p>
+         <strong>Onboarding:</strong><br>
+         ${NEBRIN.esc(
+           emp.onboarding_status||
+           'No onboarding record'
+         )}
+       </p>
+
+     </article>
+
+
+     <article class="neb-card">
+
+       <h3>
+         Contract
+       </h3>
+
+       <p>
+         <strong>Start:</strong><br>
+         ${
+           emp.contract_start_date
+           ? new Date(
+               emp.contract_start_date
+             ).toLocaleDateString()
+           : 'Not recorded'
+         }
+       </p>
+
+       <p>
+         <strong>End:</strong><br>
+         ${
+           emp.contract_end_date
+           ? new Date(
+               emp.contract_end_date
+             ).toLocaleDateString()
+           : 'Not recorded'
+         }
+       </p>
+
+       <p>
+         <strong>Salary Grade:</strong><br>
+         ${NEBRIN.esc(
+           emp.salary_grade||
+           'Not assigned'
+         )}
+       </p>
+
+     </article>
+
+
+     ${
+       canSeeSensitive
+       ?`
+
+       <article class="neb-card">
+
+         <h3>
+           Confidential Compensation
+         </h3>
+
+         <p>
+           <strong>Basic Salary:</strong><br>
+           ${NEBRIN.esc(
+             emp.currency||'TZS'
+           )}
+           ${money(
+             emp.basic_salary
+           )}
+         </p>
+
+         <p>
+           <strong>Payment Method:</strong><br>
+           ${NEBRIN.esc(
+             emp.payment_method||
+             'Not recorded'
+           )}
+         </p>
+
+         <p>
+           This information is restricted
+           to authorized HR and Management.
+         </p>
+
+       </article>
+
+       `
+       :''
+     }
+
+   </div>
+
+ </article>
+
+ `;
+
+};
+
+
+/* ============================================================
+   RECRUITMENT
+   ============================================================ */
+
+NEBMOD.hrRecruitment=()=>{
+
+ const rows=
+   NEBMOD.hrState.recruitment||[];
+
+
+ $('modMain').innerHTML=`
+
+ <article class="neb-card">
+
+   <div class="neb-section-title">
+
+     <div>
+
+       <p class="section-label">
+         TALENT ACQUISITION
+       </p>
+
+       <h2>
+         Recruitment & Vacancy Management
+       </h2>
+
+     </div>
+
+     <button
+       onclick="NEBMOD.hrOverview()"
+     >
+       Back to Overview
+     </button>
+
+   </div>
+
+
+   <p>
+     Staffing request → approved vacancy →
+     applications → shortlist → interview →
+     management decision → hiring →
+     onboarding.
+   </p>
+
+
+   <div class="neb-actions">
+
+     <a
+       class="btn btn-primary"
+       href="staffing-requests.html"
+     >
+       Staffing Requests
+     </a>
+
+   </div>
+
+
+   <div
+     class="neb-panel-list"
+     style="margin-top:20px"
+   >
+
+     ${
+       rows.map(x=>
+
+         row(
+           x.reference||
+           'Recruitment Case',
+
+           `${
+             x.applicant_name||''
+           } · ${
+             x.position||''
+           } · ${
+             x.status||''
+           }`
+         )
+
+       ).join('')||
+       '<p>No recruitment cases.</p>'
+     }
+
+   </div>
+
+ </article>
+
+ `;
+
+};
+
+
+/* ============================================================
+   LEAVE
+   ============================================================ */
+
+NEBMOD.hrLeave=()=>{
+
+ const rows=
+   NEBMOD.hrState.leave||[];
+
+
+ $('modMain').innerHTML=`
+
+ <article class="neb-card">
+
+   <div class="neb-section-title">
+
+     <h2>
+       Leave & Permission Management
+     </h2>
+
+     <button
+       onclick="NEBMOD.hrOverview()"
+     >
+       Back to Overview
+     </button>
+
+   </div>
+
+
+   ${
+     rows.map(x=>
+
+       row(
+         x.request_type||
+         'Leave Request',
+
+         `${
+           x.status||''
+         } · ${
+           NEBRIN.fmt(
+             x.created_at
+           )
+         }`
+       )
+
+     ).join('')||
+     '<p>No leave requests.</p>'
+   }
+
+ </article>
+
+ `;
+
+};
+
+
+/* ============================================================
+   DISCIPLINE
+   ============================================================ */
+
+NEBMOD.hrDiscipline=()=>{
+
+ const rows=
+   NEBMOD.hrState.discipline||[];
+
+
+ $('modMain').innerHTML=`
+
+ <article class="neb-card">
+
+   <div class="neb-section-title">
+
+     <h2>
+       Discipline &
+       Employee Relations
+     </h2>
+
+     <button
+       onclick="NEBMOD.hrOverview()"
+     >
+       Back to Overview
+     </button>
+
+   </div>
+
+
+   <p>
+     Confidential disciplinary cases,
+     warnings, employee responses,
+     hearings and management decisions.
+   </p>
+
+
+   ${
+     rows.map(x=>
+
+       row(
+         x.case_type||
+         'Discipline Case',
+
+         `${
+           x.stage||''
+         } · ${
+           x.status||''
+         }`
+       )
+
+     ).join('')||
+     '<p>No discipline cases.</p>'
+   }
+
+ </article>
+
+ `;
+
+};
+
+
+/* ============================================================
+   ONBOARDING
+   ============================================================ */
+
+NEBMOD.hrOnboarding=()=>{
+
+ const employees=
+   NEBMOD.hrState.employees||[];
+
+
+ const pending=
+   employees.filter(x=>
+
+     x.onboarding_status &&
+     ![
+       'Completed',
+       'Approved',
+       'Onboarding Completed'
+     ].includes(
+       x.onboarding_status
+     )
+
+   );
+
+
+ $('modMain').innerHTML=`
+
+ <article class="neb-card">
+
+   <div class="neb-section-title">
+
+     <div>
+
+       <p class="section-label">
+         EMPLOYEE ENTRY
+       </p>
+
+       <h2>
+         Onboarding & Documents
+       </h2>
+
+     </div>
+
+     <button
+       onclick="NEBMOD.hrOverview()"
+     >
+       Back to Overview
+     </button>
+
+   </div>
+
+
+   <div class="neb-actions">
+
+     <a
+       class="btn btn-primary"
+       href="hr-onboarding.html"
+     >
+       Open Full HR Onboarding
+     </a>
+
+   </div>
+
+
+   <h3 style="margin-top:24px">
+     Pending / Active Onboarding
+   </h3>
+
+
+   ${
+     pending.map(x=>
+
+       row(
+         x.employee_number||
+         'Employee',
+
+         `${
+           x.full_name||''
+         } · ${
+           x.onboarding_status||''
+         } · ${
+           x.department||''
+         }`
+       )
+
+     ).join('')||
+     '<p>No pending onboarding records.</p>'
+   }
+
+ </article>
+
+ `;
+
 };
 
 NEBMOD.cms=async()=>{
