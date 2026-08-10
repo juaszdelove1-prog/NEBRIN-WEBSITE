@@ -28,6 +28,10 @@
 
   let overtimeTimer = null;
 
+  // ===================================================
+  // HELPERS
+  // ===================================================
+
   function escapeHtml(value) {
     return String(value ?? "")
       .replaceAll("&", "&amp;")
@@ -38,62 +42,123 @@
   }
 
   function formatTime(value) {
-    if (!value) return "—";
+    if (!value) {
+      return "—";
+    }
 
     try {
-      return new Intl.DateTimeFormat("en-TZ", {
-        timeZone: "Africa/Dar_es_Salaam",
-        dateStyle: "medium",
-        timeStyle: "short"
-      }).format(new Date(value));
+      return new Intl.DateTimeFormat(
+        "en-TZ",
+        {
+          timeZone:
+            "Africa/Dar_es_Salaam",
+
+          dateStyle:
+            "medium",
+
+          timeStyle:
+            "short"
+        }
+      ).format(
+        new Date(value)
+      );
     } catch {
       return value;
     }
   }
 
   function getClient() {
-    if (typeof supabaseClient !== "undefined") {
+    if (
+      typeof supabaseClient !==
+      "undefined"
+    ) {
       return supabaseClient;
     }
 
-    if (window.supabaseClient) {
+    if (
+      window.supabaseClient
+    ) {
       return window.supabaseClient;
     }
 
     return null;
   }
 
-  function showMessage(message, type = "info") {
-    const box = document.getElementById("overtimeMessage");
+  function showMessage(
+    message,
+    type = "info"
+  ) {
+    const box =
+      document.getElementById(
+        "overtimeMessage"
+      );
 
-    if (!box) return;
+    if (!box) {
+      return;
+    }
 
-    box.textContent = message;
+    box.textContent =
+      message;
 
-    box.style.marginTop = "14px";
-    box.style.padding = "12px";
-    box.style.borderRadius = "10px";
-    box.style.fontWeight = "700";
+    box.style.marginTop =
+      "14px";
 
-    if (type === "success") {
-      box.style.background = "#e8f7ed";
-      box.style.color = "#176b35";
-    } else if (type === "error") {
-      box.style.background = "#fdeaea";
-      box.style.color = "#b42318";
+    box.style.padding =
+      "12px";
+
+    box.style.borderRadius =
+      "10px";
+
+    box.style.fontWeight =
+      "700";
+
+    if (
+      type === "success"
+    ) {
+      box.style.background =
+        "#e8f7ed";
+
+      box.style.color =
+        "#176b35";
+
+    } else if (
+      type === "error"
+    ) {
+
+      box.style.background =
+        "#fdeaea";
+
+      box.style.color =
+        "#b42318";
+
     } else {
-      box.style.background = "#eef4ff";
-      box.style.color = "#1d4ed8";
+
+      box.style.background =
+        "#eef4ff";
+
+      box.style.color =
+        "#1d4ed8";
     }
   }
 
+  // ===================================================
+  // CREATE PANEL
+  // ===================================================
+
   function createOvertimePanel() {
-    if (document.getElementById("nebrinOvertimeControl")) {
+
+    if (
+      document.getElementById(
+        "nebrinOvertimeControl"
+      )
+    ) {
       return;
     }
 
     const workspace =
-      document.getElementById("ceoWorkspace");
+      document.getElementById(
+        "ceoWorkspace"
+      );
 
     if (!workspace) {
       console.warn(
@@ -102,31 +167,61 @@
       return;
     }
 
-    const panel = document.createElement("article");
+    const panel =
+      document.createElement(
+        "article"
+      );
 
-    panel.id = "nebrinOvertimeControl";
-    panel.className = "neb-card";
+    panel.id =
+      "nebrinOvertimeControl";
 
-    const options = DEPARTMENTS
-      .map(
-        department =>
-          `<option value="${escapeHtml(department)}">${escapeHtml(department)}</option>`
-      )
-      .join("");
+    panel.className =
+      "neb-card";
+
+    const options =
+      DEPARTMENTS
+        .map(
+          department =>
+            `
+            <option value="${escapeHtml(
+              department
+            )}">
+              ${escapeHtml(
+                department
+              )}
+            </option>
+            `
+        )
+        .join("");
 
     panel.innerHTML = `
-      <h2>Department Overtime Control</h2>
+      <h2>
+        Department Overtime Control
+      </h2>
 
       <p>
-        CEO may authorize a department to continue working
-        after official office hours for exactly
-        <strong>${OVERTIME_HOURS} hours</strong>.
+        CEO may authorize a department
+        to continue working after official
+        office hours for exactly
+        <strong>
+          ${OVERTIME_HOURS} hours
+        </strong>.
       </p>
 
-      <div style="display:grid;gap:12px;margin-top:18px;">
+      <div
+        style="
+          display:grid;
+          gap:12px;
+          margin-top:18px;
+        "
+      >
 
-        <label for="overtimeDepartment">
-          <strong>Select Department</strong>
+        <label
+          for="overtimeDepartment"
+        >
+          <strong>
+            Select Department
+          </strong>
         </label>
 
         <select
@@ -138,8 +233,13 @@
             border:1px solid #ccd3df;
           "
         >
-          <option value="">Choose department</option>
+
+          <option value="">
+            Choose department
+          </option>
+
           ${options}
+
         </select>
 
         <button
@@ -168,35 +268,51 @@
 
       </div>
 
-      <div id="overtimeMessage"></div>
+      <div
+        id="overtimeMessage"
+      ></div>
 
       <div
         id="overtimeActiveList"
-        style="margin-top:20px;"
+        style="
+          margin-top:20px;
+        "
       >
         Loading overtime status...
       </div>
     `;
 
-    workspace.appendChild(panel);
+    workspace.appendChild(
+      panel
+    );
 
     document
-      .getElementById("grantOvertimeButton")
+      .getElementById(
+        "grantOvertimeButton"
+      )
       ?.addEventListener(
         "click",
         grantOvertime
       );
 
     document
-      .getElementById("revokeOvertimeButton")
+      .getElementById(
+        "revokeOvertimeButton"
+      )
       ?.addEventListener(
         "click",
         revokeOvertime
       );
   }
 
+  // ===================================================
+  // GRANT OVERTIME
+  // ===================================================
+
   async function grantOvertime() {
-    const client = getClient();
+
+    const client =
+      getClient();
 
     if (!client) {
       showMessage(
@@ -208,7 +324,9 @@
 
     const department =
       document
-        .getElementById("overtimeDepartment")
+        .getElementById(
+          "overtimeDepartment"
+        )
         ?.value;
 
     if (!department) {
@@ -223,46 +341,74 @@
       `Authorizing ${department}...`
     );
 
-    const {
-      data,
-      error
-    } = await client.rpc(
-      "grant_department_overtime",
-      {
-        p_department: department
-      }
-    );
+    try {
 
-    if (error) {
+      const {
+        data,
+        error
+      } =
+        await client.rpc(
+          "grant_department_overtime",
+          {
+            p_department:
+              department
+          }
+        );
+
+      if (error) {
+
+        console.error(
+          "Grant overtime error:",
+          error
+        );
+
+        showMessage(
+          `${error.message || "Unable to grant overtime."} ${
+            error.code
+              ? `(Code: ${error.code})`
+              : ""
+          }`,
+          "error"
+        );
+
+        return;
+      }
+
+      showMessage(
+        `${department} has been authorized to work for 2 additional hours.`,
+        "success"
+      );
+
+      console.log(
+        "Overtime granted:",
+        data
+      );
+
+      await loadOvertimeStatus();
+
+    } catch (error) {
+
       console.error(
-        "Grant overtime error:",
+        "Grant overtime exception:",
         error
       );
 
       showMessage(
-        error.message ||
+        error?.message ||
           "Unable to grant overtime.",
         "error"
       );
-
-      return;
     }
-
-    showMessage(
-      `${department} has been authorized to work for 2 additional hours.`,
-      "success"
-    );
-
-    console.log(
-      "Overtime granted:",
-      data
-    );
-
-    await loadOvertimeStatus();
   }
 
+  // ===================================================
+  // REVOKE OVERTIME
+  // ===================================================
+
   async function revokeOvertime() {
-    const client = getClient();
+
+    const client =
+      getClient();
 
     if (!client) {
       showMessage(
@@ -274,7 +420,9 @@
 
     const department =
       document
-        .getElementById("overtimeDepartment")
+        .getElementById(
+          "overtimeDepartment"
+        )
         ?.value;
 
     if (!department) {
@@ -285,162 +433,378 @@
       return;
     }
 
-    const {
-      data,
-      error
-    } = await client.rpc(
-      "revoke_department_overtime",
-      {
-        p_department: department
-      }
+    showMessage(
+      `Revoking ${department} overtime...`
     );
 
-    if (error) {
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await client.rpc(
+          "revoke_department_overtime",
+          {
+            p_department:
+              department
+          }
+        );
+
+      if (error) {
+
+        console.error(
+          "Revoke overtime error:",
+          error
+        );
+
+        showMessage(
+          `${error.message || "Unable to revoke overtime."} ${
+            error.code
+              ? `(Code: ${error.code})`
+              : ""
+          }`,
+          "error"
+        );
+
+        return;
+      }
+
+      showMessage(
+        `${department} overtime authorization has been revoked.`,
+        "success"
+      );
+
+      console.log(
+        "Overtime revoked:",
+        data
+      );
+
+      await loadOvertimeStatus();
+
+    } catch (error) {
+
       console.error(
-        "Revoke overtime error:",
+        "Revoke overtime exception:",
         error
       );
 
       showMessage(
-        error.message ||
+        error?.message ||
           "Unable to revoke overtime.",
         "error"
       );
-
-      return;
     }
-
-    showMessage(
-      `${department} overtime authorization has been revoked.`,
-      "success"
-    );
-
-    console.log(
-      "Overtime revoked:",
-      data
-    );
-
-    await loadOvertimeStatus();
   }
 
+  // ===================================================
+  // LOAD ACTIVE OVERTIME
+  // ===================================================
+
   async function loadOvertimeStatus() {
-    const client = getClient();
+
+    const client =
+      getClient();
 
     const container =
       document.getElementById(
         "overtimeActiveList"
       );
 
-    if (!client || !container) {
+    if (
+      !container
+    ) {
       return;
     }
 
-    const {
-      data,
-      error
-    } = await client
-      .from(
-        "department_overtime_authorizations"
-      )
-      .select(
-        "department,is_active,granted_at,expires_at"
-      )
-      .eq(
-        "is_active",
-        true
-      )
-      .gt(
-        "expires_at",
-        new Date().toISOString()
-      )
-      .order(
-        "expires_at",
-        {
-          ascending: true
-        }
-      );
+    if (
+      !client
+    ) {
 
-    if (error) {
-      console.error(
-        "Overtime status error:",
-        error
-      );
-
-      container.innerHTML =
-        "<p>Unable to load overtime status.</p>";
-
-      return;
-    }
-
-    if (!data || data.length === 0) {
       container.innerHTML = `
-        <h3>Active Overtime</h3>
-        <p>No department currently has overtime authorization.</p>
+        <div
+          style="
+            padding:14px;
+            border-radius:10px;
+            background:#fdeaea;
+            color:#b42318;
+          "
+        >
+
+          <strong>
+            Supabase Connection Error
+          </strong>
+
+          <p>
+            The database client is unavailable.
+          </p>
+
+        </div>
       `;
 
       return;
     }
 
     container.innerHTML = `
-      <h3>Active Overtime</h3>
-
-      ${data
-        .map(
-          item => `
-            <div
-              style="
-                padding:12px;
-                margin-top:10px;
-                border:1px solid #dde3ec;
-                border-radius:10px;
-              "
-            >
-              <strong>${escapeHtml(item.department)}</strong>
-
-              <br>
-
-              <small>
-                Granted:
-                ${escapeHtml(formatTime(item.granted_at))}
-              </small>
-
-              <br>
-
-              <small>
-                Automatically closes:
-                ${escapeHtml(formatTime(item.expires_at))}
-              </small>
-            </div>
-          `
-        )
-        .join("")}
+      <p>
+        Loading overtime status...
+      </p>
     `;
+
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await client
+          .from(
+            "department_overtime_authorizations"
+          )
+          .select(
+            "department,is_active,granted_at,expires_at"
+          )
+          .eq(
+            "is_active",
+            true
+          )
+          .gt(
+            "expires_at",
+            new Date()
+              .toISOString()
+          )
+          .order(
+            "expires_at",
+            {
+              ascending:
+                true
+            }
+          );
+
+      // ===============================================
+      // SHOW REAL DATABASE ERROR ON SCREEN
+      // ===============================================
+
+      if (error) {
+
+        console.error(
+          "Overtime status error:",
+          error
+        );
+
+        container.innerHTML = `
+          <div
+            style="
+              padding:14px;
+              border-radius:10px;
+              background:#fdeaea;
+              color:#b42318;
+            "
+          >
+
+            <strong>
+              Overtime Database Error
+            </strong>
+
+            <p>
+              ${escapeHtml(
+                error.message ||
+                "Unknown error"
+              )}
+            </p>
+
+            <small>
+              Code:
+              ${escapeHtml(
+                error.code ||
+                "—"
+              )}
+            </small>
+
+            ${
+              error.details
+                ? `
+                  <p>
+                    <small>
+                      Details:
+                      ${escapeHtml(
+                        error.details
+                      )}
+                    </small>
+                  </p>
+                `
+                : ""
+            }
+
+            ${
+              error.hint
+                ? `
+                  <p>
+                    <small>
+                      Hint:
+                      ${escapeHtml(
+                        error.hint
+                      )}
+                    </small>
+                  </p>
+                `
+                : ""
+            }
+
+          </div>
+        `;
+
+        return;
+      }
+
+      // ===============================================
+      // NO ACTIVE OVERTIME
+      // ===============================================
+
+      if (
+        !data ||
+        data.length === 0
+      ) {
+
+        container.innerHTML = `
+          <h3>
+            Active Overtime
+          </h3>
+
+          <p>
+            No department currently has
+            overtime authorization.
+          </p>
+        `;
+
+        return;
+      }
+
+      // ===============================================
+      // ACTIVE OVERTIME LIST
+      // ===============================================
+
+      container.innerHTML = `
+        <h3>
+          Active Overtime
+        </h3>
+
+        ${data
+          .map(
+            item => `
+              <div
+                style="
+                  padding:12px;
+                  margin-top:10px;
+                  border:1px solid #dde3ec;
+                  border-radius:10px;
+                "
+              >
+
+                <strong>
+                  ${escapeHtml(
+                    item.department
+                  )}
+                </strong>
+
+                <br>
+
+                <small>
+                  Granted:
+                  ${escapeHtml(
+                    formatTime(
+                      item.granted_at
+                    )
+                  )}
+                </small>
+
+                <br>
+
+                <small>
+                  Automatically closes:
+                  ${escapeHtml(
+                    formatTime(
+                      item.expires_at
+                    )
+                  )}
+                </small>
+
+              </div>
+            `
+          )
+          .join("")}
+      `;
+
+    } catch (error) {
+
+      console.error(
+        "Overtime status exception:",
+        error
+      );
+
+      container.innerHTML = `
+        <div
+          style="
+            padding:14px;
+            border-radius:10px;
+            background:#fdeaea;
+            color:#b42318;
+          "
+        >
+
+          <strong>
+            Overtime System Error
+          </strong>
+
+          <p>
+            ${escapeHtml(
+              error?.message ||
+              "Unexpected error occurred."
+            )}
+          </p>
+
+        </div>
+      `;
+    }
   }
 
+  // ===================================================
+  // INITIALIZE
+  // ===================================================
+
   async function initialize() {
+
     createOvertimePanel();
 
     await loadOvertimeStatus();
 
-    if (overtimeTimer) {
-      clearInterval(overtimeTimer);
+    if (
+      overtimeTimer
+    ) {
+      clearInterval(
+        overtimeTimer
+      );
     }
 
-    overtimeTimer = setInterval(
-      loadOvertimeStatus,
-      60000
-    );
+    overtimeTimer =
+      setInterval(
+        loadOvertimeStatus,
+        60000
+      );
   }
 
   if (
     document.readyState ===
     "loading"
   ) {
+
     document.addEventListener(
       "DOMContentLoaded",
       initialize
     );
+
   } else {
+
     initialize();
   }
 
