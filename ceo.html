@@ -1,4 +1,293 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NEBRIN CEO Command Centre</title><link rel="stylesheet" href="styles.css"></head><body class="ceo-page"><header class="site-header"><div class="container nav-wrap"><a class="brand" href="index.html"><span class="brand-mark"><span class="brand-orbit"></span><span class="brand-globe">N</span></span><span class="brand-copy"><strong>NEBRIN</strong><small>CEO EXECUTIVE COMMAND CENTRE</small></span></a><a class="btn btn-secondary-admin" href="admin.html">Operations</a></div></header><main class="neb-shell"><section id="ceoAccess" class="neb-card">Checking CEO access…</section><section id="ceoWorkspace" class="hidden"><div class="v21-section-intro"><p class="section-label">EXECUTIVE MONITORING</p><h1>CEO Office Monitoring & Strategic Control</h1><p>Departments execute → HODs control → Manager supervises → CEO monitors and decides high-level matters.</p></div><div id="ceoStats" class="neb-status-grid"></div><div class="neb-grid-2"><article class="neb-card"><h2>Department Status</h2><div id="ceoDepartments"></div></article><article class="neb-card neb-security"><h2>CEO Confidential Security Alerts</h2><div id="ceoSecurity"></div></article><article class="neb-card"><h2>Today's Staff Status</h2><div id="ceoAttendance"></div></article><article class="neb-card"><h2>Management Reports & Escalations</h2><div id="ceoReports"></div></article></div><div class="neb-grid-2"><article class="neb-card"><h2>Currently Online</h2><div id="ceoOnline"></div></article><article class="neb-card"><h2>Recent Employee Activity</h2><div id="ceoActivity"></div></article></div><article class="neb-card"><h2>Department Access</h2><div class="department-dashboard-links"><a href="manager.html">Manager</a><a href="secretary.html">Secretary</a><a href="customer-care-dashboard.html">Customer Care</a><a href="hr.html">HR</a><a href="finance.html">Finance</a><a href="business.html">Business</a><a href="legal.html">Legal</a><a href="registration.html">Registration</a><a href="sales-field.html">Sales Field</a><a href="graphics.html">Graphics</a><a href="it.html">IT</a><a href="registry.html">Registry</a><a href="security-department.html">Security</a><a href="cms.html">Publishing</a><a href="staff-room.html">Staff Room</a><a href="system-health.html">System Command & Security</a></div></article></section></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script src="security.js"></script><script> src="ceo-final.js"></script<script> src="ceo-final.js"></script>
-<script src="overtime-control.js"></script>
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
+
+  <title>
+    NEBRIN CEO Command Centre
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+</head>
+
+<body class="ceo-page">
+
+  <header class="site-header">
+    <div class="container nav-wrap">
+
+      <a
+        class="brand"
+        href="index.html"
+      >
+        <span class="brand-mark">
+          <span class="brand-orbit"></span>
+          <span class="brand-globe">N</span>
+        </span>
+
+        <span class="brand-copy">
+          <strong>NEBRIN</strong>
+          <small>
+            CEO EXECUTIVE COMMAND CENTRE
+          </small>
+        </span>
+      </a>
+
+      <a
+        class="btn btn-secondary-admin"
+        href="admin.html"
+      >
+        Operations
+      </a>
+
+    </div>
+  </header>
+
+
+  <main class="neb-shell">
+
+    <!-- ========================================= -->
+    <!-- CEO ACCESS CHECK -->
+    <!-- ========================================= -->
+
+    <section
+      id="ceoAccess"
+      class="neb-card"
+    >
+      Checking CEO access…
+    </section>
+
+
+    <!-- ========================================= -->
+    <!-- CEO WORKSPACE -->
+    <!-- ========================================= -->
+
+    <section
+      id="ceoWorkspace"
+      class="hidden"
+    >
+
+      <div class="v21-section-intro">
+
+        <p class="section-label">
+          EXECUTIVE MONITORING
+        </p>
+
+        <h1>
+          CEO Office Monitoring & Strategic Control
+        </h1>
+
+        <p>
+          Departments execute → HODs control →
+          Manager supervises → CEO monitors and
+          decides high-level matters.
+        </p>
+
+      </div>
+
+
+      <!-- ======================================= -->
+      <!-- CEO STATISTICS -->
+      <!-- ======================================= -->
+
+      <div
+        id="ceoStats"
+        class="neb-status-grid"
+      ></div>
+
+
+      <!-- ======================================= -->
+      <!-- MAIN CEO INFORMATION -->
+      <!-- ======================================= -->
+
+      <div class="neb-grid-2">
+
+        <article class="neb-card">
+
+          <h2>
+            Department Status
+          </h2>
+
+          <div id="ceoDepartments"></div>
+
+        </article>
+
+
+        <article class="neb-card neb-security">
+
+          <h2>
+            CEO Confidential Security Alerts
+          </h2>
+
+          <div id="ceoSecurity"></div>
+
+        </article>
+
+
+        <article class="neb-card">
+
+          <h2>
+            Today's Staff Status
+          </h2>
+
+          <div id="ceoAttendance"></div>
+
+        </article>
+
+
+        <article class="neb-card">
+
+          <h2>
+            Management Reports & Escalations
+          </h2>
+
+          <div id="ceoReports"></div>
+
+        </article>
+
+      </div>
+
+
+      <!-- ======================================= -->
+      <!-- ONLINE STAFF + ACTIVITY -->
+      <!-- ======================================= -->
+
+      <div class="neb-grid-2">
+
+        <article class="neb-card">
+
+          <h2>
+            Currently Online
+          </h2>
+
+          <div id="ceoOnline"></div>
+
+        </article>
+
+
+        <article class="neb-card">
+
+          <h2>
+            Recent Employee Activity
+          </h2>
+
+          <div id="ceoActivity"></div>
+
+        </article>
+
+      </div>
+
+
+      <!-- ======================================= -->
+      <!-- DEPARTMENT ACCESS -->
+      <!-- ======================================= -->
+
+      <article class="neb-card">
+
+        <h2>
+          Department Access
+        </h2>
+
+        <div class="department-dashboard-links">
+
+          <a href="manager.html">
+            Manager
+          </a>
+
+          <a href="secretary.html">
+            Secretary
+          </a>
+
+          <a href="customer-care-dashboard.html">
+            Customer Care
+          </a>
+
+          <a href="hr.html">
+            HR
+          </a>
+
+          <a href="finance.html">
+            Finance
+          </a>
+
+          <a href="business.html">
+            Business
+          </a>
+
+          <a href="legal.html">
+            Legal
+          </a>
+
+          <a href="registration.html">
+            Registration
+          </a>
+
+          <a href="sales-field.html">
+            Sales Field
+          </a>
+
+          <a href="graphics.html">
+            Graphics
+          </a>
+
+          <a href="it.html">
+            IT
+          </a>
+
+          <a href="registry.html">
+            Registry
+          </a>
+
+          <a href="security-department.html">
+            Security
+          </a>
+
+          <a href="cms.html">
+            Publishing
+          </a>
+
+          <a href="staff-room.html">
+            Staff Room
+          </a>
+
+          <a href="system-health.html">
+            System Command & Security
+          </a>
+
+        </div>
+
+      </article>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================================== -->
+  <!-- JAVASCRIPT -->
+  <!-- ORDER IS IMPORTANT -->
+  <!-- =========================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script src="supabase-config.js"></script>
+
+  <script src="security.js"></script>
+
+  <script src="ceo-final.js"></script>
+
+  <script src="overtime-control.js"></script>
+
+
 </body>
 </html>
