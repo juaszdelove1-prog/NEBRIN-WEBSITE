@@ -1,5 +1,3 @@
-alert("CEO FINAL JS LOADED");
-
 const e = (v = '') =>
   String(v ?? '').replace(
     /[&<>"']/g,
