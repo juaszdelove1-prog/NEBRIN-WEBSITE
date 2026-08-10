@@ -52,10 +52,8 @@
         {
           timeZone:
             "Africa/Dar_es_Salaam",
-
           dateStyle:
             "medium",
-
           timeStyle:
             "short"
         }
@@ -142,7 +140,7 @@
   }
 
   // ===================================================
-  // CREATE PANEL
+  // CREATE OVERTIME PANEL
   // ===================================================
 
   function createOvertimePanel() {
@@ -164,6 +162,7 @@
       console.warn(
         "NEBRIN Overtime: ceoWorkspace was not found."
       );
+
       return;
     }
 
@@ -319,6 +318,7 @@
         "Supabase connection is unavailable.",
         "error"
       );
+
       return;
     }
 
@@ -334,6 +334,7 @@
         "Please select a department first.",
         "error"
       );
+
       return;
     }
 
@@ -363,9 +364,9 @@
         );
 
         showMessage(
-          `${error.message || "Unable to grant overtime."} ${
+          `${error.message || "Unable to grant overtime."}${
             error.code
-              ? `(Code: ${error.code})`
+              ? ` (Code: ${error.code})`
               : ""
           }`,
           "error"
@@ -415,6 +416,7 @@
         "Supabase connection is unavailable.",
         "error"
       );
+
       return;
     }
 
@@ -430,6 +432,7 @@
         "Please select a department first.",
         "error"
       );
+
       return;
     }
 
@@ -459,9 +462,9 @@
         );
 
         showMessage(
-          `${error.message || "Unable to revoke overtime."} ${
+          `${error.message || "Unable to revoke overtime."}${
             error.code
-              ? `(Code: ${error.code})`
+              ? ` (Code: ${error.code})`
               : ""
           }`,
           "error"
@@ -498,7 +501,7 @@
   }
 
   // ===================================================
-  // LOAD ACTIVE OVERTIME
+  // LOAD ACTIVE OVERTIME STATUS
   // ===================================================
 
   async function loadOvertimeStatus() {
@@ -511,15 +514,11 @@
         "overtimeActiveList"
       );
 
-    if (
-      !container
-    ) {
+    if (!container) {
       return;
     }
 
-    if (
-      !client
-    ) {
+    if (!client) {
 
       container.innerHTML = `
         <div
@@ -562,11 +561,11 @@
             "department_overtime_authorizations"
           )
           .select(
-            "department,is_active,granted_at,expires_at"
+            "department,status,approved_at,starts_at,expires_at,approved_by,reason"
           )
           .eq(
-            "is_active",
-            true
+            "status",
+            "ACTIVE"
           )
           .gt(
             "expires_at",
@@ -580,10 +579,6 @@
                 true
             }
           );
-
-      // ===============================================
-      // SHOW REAL DATABASE ERROR ON SCREEN
-      // ===============================================
 
       if (error) {
 
@@ -657,9 +652,9 @@
         return;
       }
 
-      // ===============================================
+      // =================================================
       // NO ACTIVE OVERTIME
-      // ===============================================
+      // =================================================
 
       if (
         !data ||
@@ -672,17 +667,16 @@
           </h3>
 
           <p>
-            No department currently has
-            overtime authorization.
+            No department currently has overtime authorization.
           </p>
         `;
 
         return;
       }
 
-      // ===============================================
+      // =================================================
       // ACTIVE OVERTIME LIST
-      // ===============================================
+      // =================================================
 
       container.innerHTML = `
         <h3>
@@ -710,10 +704,21 @@
                 <br>
 
                 <small>
-                  Granted:
+                  Approved:
                   ${escapeHtml(
                     formatTime(
-                      item.granted_at
+                      item.approved_at
+                    )
+                  )}
+                </small>
+
+                <br>
+
+                <small>
+                  Overtime starts:
+                  ${escapeHtml(
+                    formatTime(
+                      item.starts_at
                     )
                   )}
                 </small>
@@ -728,6 +733,20 @@
                     )
                   )}
                 </small>
+
+                ${
+                  item.reason
+                    ? `
+                      <br>
+                      <small>
+                        Reason:
+                        ${escapeHtml(
+                          item.reason
+                        )}
+                      </small>
+                    `
+                    : ""
+                }
 
               </div>
             `
