@@ -11,3 +11,5 @@ export type WorkflowPayload={success:boolean;data:{tray:WorkflowTrayItem[];intak
 export type PaymentMethod={id:string;provider:string;payment_type:string;account_number?:string|null;account_name?:string|null;instructions?:string|null};
 export type PaymentRequest={id:string;bill_reference:string;application_reference?:string|null;provider:string;payment_type:string;account_number?:string|null;account_name?:string|null;amount:number|string;status:string;created_at?:string|null};
 export type FinancePayload={success:boolean;summary:{generated:number;paid:number;cancelled:number;expired:number};payment_methods:PaymentMethod[];payment_requests:PaymentRequest[]};
+export type StaffNotification={id:string;source:'employee'|'department';title:string;message:string;priority:string;is_read:boolean;created_at:string};
+export type NotificationPayload={success:boolean;summary:{total:number;unread:number};notifications:StaffNotification[]};
