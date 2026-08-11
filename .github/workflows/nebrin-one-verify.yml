@@ -12,6 +12,9 @@ on:
     paths:
       - 'nebrin-one-app/**'
 
+permissions:
+  contents: write
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -21,12 +24,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'push' && github.ref_name || github.sha }}
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Generate dependency lockfile when missing
+        if: github.event_name == 'push' && hashFiles('nebrin-one-app/package-lock.json') == ''
+        run: npm install --package-lock-only --no-audit --no-fund
+      - name: Commit dependency lockfile
+        if: github.event_name == 'push' && hashFiles('nebrin-one-app/package-lock.json') != ''
+        working-directory: .
+        run: |
+          if git diff --quiet -- nebrin-one-app/package-lock.json && git ls-files --error-unmatch nebrin-one-app/package-lock.json >/dev/null 2>&1; then
+            echo "Lockfile already committed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add nebrin-one-app/package-lock.json
+          git commit -m "Lock NEBRIN ONE dependencies for release builds"
+          git push origin HEAD:${{ github.ref_name }}
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: TypeScript strict check
         run: npm run typecheck
       - name: Expo Doctor
