@@ -13,3 +13,7 @@ export type PaymentRequest={id:string;bill_reference:string;application_referenc
 export type FinancePayload={success:boolean;summary:{generated:number;paid:number;cancelled:number;expired:number};payment_methods:PaymentMethod[];payment_requests:PaymentRequest[]};
 export type StaffNotification={id:string;source:'employee'|'department';title:string;message:string;priority:string;is_read:boolean;created_at:string};
 export type NotificationPayload={success:boolean;summary:{total:number;unread:number};notifications:StaffNotification[]};
+export type SecurityIncident={id:string;incident_number:string;title:string;summary?:string|null;severity:string;incident_class?:string|null;ceo_confidential?:boolean;status:string;system_action?:string|null;recommended_action?:string|null;created_at?:string|null};
+export type WorkflowApproval={id:string;file_id:string;task_id?:string|null;approver_role:string;status:string;request_note?:string|null;decision_note?:string|null;requested_at?:string|null};
+export type OvertimeAuthorization={id:string;department:string;starts_at?:string|null;expires_at:string;status:string;reason?:string|null};
+export type SecurityPayload={success:boolean;incidents:SecurityIncident[];approvals:WorkflowApproval[];overtime:OvertimeAuthorization[]};
