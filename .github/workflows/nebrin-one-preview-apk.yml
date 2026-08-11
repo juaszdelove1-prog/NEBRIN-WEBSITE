@@ -8,6 +8,12 @@ on:
     paths:
       - 'nebrin-one-app/**'
       - '.github/workflows/nebrin-one-preview-apk.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'nebrin-one-app/**'
+      - '.github/workflows/nebrin-one-preview-apk.yml'
 
 jobs:
   build-preview-apk:
