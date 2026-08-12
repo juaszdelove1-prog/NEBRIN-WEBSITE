@@ -4,14 +4,20 @@ function list<T>(value:T[]|undefined){return Array.isArray(value)?value:[]}
 
 export function HRDashboard({payload}:{payload:HRPayload|null}){
  if(!payload)return null;
- const employees=list(payload.employees),requests=list(payload.staffing_requests),s=payload.summary;
+ const employees=list(payload.employees),requests=list(payload.staffing_requests);
+ const raw:any=payload as any;
+ const s=raw.summary||raw.stats||{};
+ const active=Number(s.active_employees||0);
+ const probation=Number(s.probation||0);
+ const openRequests=Number(s.open_staffing_requests||0);
+ const contractsEnding=Number(s.contracts_ending_soon||employees.filter((x:any)=>{if(!x.contract_end_date)return false;const end=new Date(x.contract_end_date).getTime();const now=Date.now();return end>=now&&end-now<=1000*60*60*24*60}).length||0);
  return <>
   <Card title="HR Command Centre">
    <View style={st.grid}>
-    <K n={s.active_employees} t="Active Employees"/>
-    <K n={s.probation} t="Probation"/>
-    <K n={s.contracts_ending_soon} t="Contracts Ending"/>
-    <K n={s.open_staffing_requests} t="Staffing Requests"/>
+    <K n={active} t="Active Employees"/>
+    <K n={probation} t="Probation"/>
+    <K n={contractsEnding} t="Contracts Ending"/>
+    <K n={openRequests} t="Staffing Requests"/>
    </View>
   </Card>
   <Card title="Employee Directory">
