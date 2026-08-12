@@ -4,7 +4,6 @@
 
 begin;
 
--- Canonical Finance role aliases.
 insert into public.nebrin_role_aliases(alias, role_code)
 values
   ('Treasurer','TREASURER'),
@@ -17,16 +16,12 @@ values
   ('EXTERNAL_AUDITOR','EXTERNAL_AUDITOR')
 on conflict (alias) do update set role_code=excluded.role_code;
 
--- Run the one-time correction through the existing management guard.
--- We dynamically choose an approved active management identity; no generated
--- user ID is hard-coded into this migration.
 do $$
 declare
   v_manager uuid;
   v_target uuid;
 begin
-  select au.user_id
-    into v_manager
+  select au.user_id into v_manager
   from public.admin_users au
   left join public.nebrin_role_aliases ra on ra.alias=au.role
   where au.is_active=true
@@ -40,26 +35,30 @@ begin
     raise exception 'No approved management identity available for Finance role correction';
   end if;
 
-  select au.user_id
-    into v_target
+  select au.user_id into v_target
   from public.admin_users au
-  where lower(au.email)=lower('zilpaherbert@gmail.com')
+  where upper(trim(au.full_name))='ZILPA HERBERT NZIKU'
+    and au.department in ('Finance','Finance & Accounts')
+  order by au.created_at
   limit 1;
 
   if v_target is null then
     raise exception 'Finance head record not found';
   end if;
 
-  -- auth.uid() reads the JWT claim from the current transaction context.
   perform set_config('request.jwt.claim.sub',v_manager::text,true);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',v_manager::text,'role','authenticated')::text,true);
 
   update public.admin_users
      set role='Treasurer',
+         department='Finance & Accounts',
+         public_job_title='Treasurer / Head of Finance',
          approved_by=coalesce(approved_by,v_manager),
          approved_at=coalesce(approved_at,now())
    where user_id=v_target
-     and role is distinct from 'Treasurer';
+     and (role is distinct from 'Treasurer'
+       or department is distinct from 'Finance & Accounts'
+       or public_job_title is distinct from 'Treasurer / Head of Finance');
 
   update public.employee_employment
      set job_title='Treasurer / Head of Finance'
