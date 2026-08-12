@@ -1,4 +1,4 @@
-name: NEBRIN ONE Preview APK
+name: NEBRIN ONE Standalone Preview APK
 
 on:
   workflow_dispatch:
@@ -43,13 +43,13 @@ jobs:
         run: npx expo-doctor@latest
       - name: Generate Android native project
         run: npx expo prebuild --platform android --non-interactive --clean
-      - name: Build installable preview APK
-        run: ./gradlew assembleDebug
+      - name: Build standalone release APK with embedded JS bundle
+        run: ./gradlew assembleRelease
         working-directory: nebrin-one-app/android
-      - name: Upload NEBRIN ONE APK
+      - name: Upload NEBRIN ONE standalone APK
         uses: actions/upload-artifact@v4
         with:
-          name: NEBRIN-ONE-preview-apk
-          path: nebrin-one-app/android/app/build/outputs/apk/debug/app-debug.apk
+          name: NEBRIN-ONE-standalone-preview-apk
+          path: nebrin-one-app/android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
