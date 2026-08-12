@@ -1,5 +1,6 @@
 name: NEBRIN ONE Standalone Preview APK
 
+# Build trigger refresh: Finance Command Centre + Overtime selector
 on:
   workflow_dispatch:
   push:
