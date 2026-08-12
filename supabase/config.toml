@@ -1,0 +1,4 @@
+# NEBRIN Supabase project configuration
+# This file intentionally contains only the required local project identifier.
+# Production schema changes must be added as reviewed SQL files under supabase/migrations/.
+project_id = "nebrin-website"
