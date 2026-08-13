@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import {Pressable,StyleSheet,Text,TextInput,View} from 'react-native';
+import {Pressable,StyleSheet,Text,View} from 'react-native';
 import type {FinanceGovernancePayload,FinancePayload} from '../types/app';
 import {
   cancelPayment,
@@ -15,14 +15,40 @@ import {
 } from '../lib/api';
 import {Card} from './Card';
 
+const STAFF_COUNTS=[1,2,3,4,5,6,7,8,9,10];
+const STAFF_REASONS=[
+  'Increased workload / customer demand',
+  'New branch, service or work station',
+  'Shift coverage / extended service hours',
+  'Separation of duties / internal control',
+  'Replacement for vacant position',
+  'Work backlog / delayed processing',
+  'Temporary peak workload',
+  'Department expansion',
+];
+const STAFF_SKILLS=[
+  'Bookkeeping',
+  'Cash handling',
+  'Bank & mobile money reconciliation',
+  'Accounting software',
+  'Excel / spreadsheets',
+  'Financial reporting',
+  'Budgeting',
+  'Tax & statutory compliance',
+  'Customer service',
+  'Payment processing',
+  'Audit & internal controls',
+  'Records & document management',
+];
+
 export function FinanceCentre({payload,onRefresh}:{payload:FinancePayload|null;onRefresh:()=>Promise<void>}){
   const [busy,setBusy]=useState<string|null>(null);
   const [msg,setMsg]=useState<string|null>(null);
   const [gov,setGov]=useState<FinanceGovernancePayload['data']|null>(null);
   const [authz,setAuthz]=useState<any>(null);
   const [staffReason,setStaffReason]=useState('');
-  const [staffSkills,setStaffSkills]=useState('');
-  const [staffCount,setStaffCount]=useState('1');
+  const [staffSkills,setStaffSkills]=useState<string[]>([]);
+  const [staffCount,setStaffCount]=useState(1);
 
   async function refreshGov(){
     try{
@@ -38,7 +64,6 @@ export function FinanceCentre({payload,onRefresh}:{payload:FinancePayload|null;o
   if(!payload)return null;
 
   const q=payload.payment_requests||[];
-  const requestedCount=Math.max(1,Math.min(20,Number.parseInt(staffCount,10)||1));
 
   async function run(id:string,fn:()=>Promise<any>){
     try{
@@ -53,11 +78,15 @@ export function FinanceCentre({payload,onRefresh}:{payload:FinancePayload|null;o
     }
   }
 
+  function toggleSkill(skill:string){
+    setStaffSkills(current=>current.includes(skill)?current.filter(x=>x!==skill):[...current,skill]);
+  }
+
   async function requestStaff(role:'CASHIER'|'ACCOUNTANT'){
-    await submitFinanceStaffing(role,staffReason.trim(),requestedCount,staffSkills.trim());
+    await submitFinanceStaffing(role,staffReason,staffCount,staffSkills.join(', '));
     setStaffReason('');
-    setStaffSkills('');
-    setStaffCount('1');
+    setStaffSkills([]);
+    setStaffCount(1);
   }
 
   const canSeePayments=!!gov&&(gov.capabilities.cashier||gov.capabilities.accounting||gov.capabilities.treasury||gov.role_code==='CEO'||gov.role_code==='MANAGER');
@@ -65,6 +94,7 @@ export function FinanceCentre({payload,onRefresh}:{payload:FinancePayload|null;o
   const canVerify=!!gov?.capabilities.accounting&&gov?.role_code==='ACCOUNTANT';
   const canCancel=!!gov&&(gov.capabilities.treasury||gov.role_code==='CEO'||gov.role_code==='MANAGER');
   const isTreasurer=gov?.role_code==='TREASURER';
+  const staffingReady=!!staffReason&&staffSkills.length>0;
 
   return <>
     <Card title="Finance Command Centre">
@@ -74,33 +104,39 @@ export function FinanceCentre({payload,onRefresh}:{payload:FinancePayload|null;o
 
         {isTreasurer&&gov.capabilities.staffing_request?<View style={s.hodBox}>
           <Text style={s.hodTitle}>Head of Department — Finance Staffing</Text>
-          <Text style={s.hodText}>Request additional Finance staff when the department needs more capacity. Accountant and Cashier remain separate roles with their own duties.</Text>
-          <TextInput
-            style={s.input}
-            value={staffCount}
-            onChangeText={setStaffCount}
-            keyboardType="number-pad"
-            placeholder="Number required"
-          />
-          <TextInput
-            style={s.input}
-            value={staffReason}
-            onChangeText={setStaffReason}
-            placeholder="Reason / staffing need"
-            multiline
-          />
-          <TextInput
-            style={s.input}
-            value={staffSkills}
-            onChangeText={setStaffSkills}
-            placeholder="Required skills / qualifications (optional)"
-            multiline
-          />
+          <Text style={s.hodText}>Select the number of employees, the staffing reason and the required skills. Accountant and Cashier remain separate roles with their own duties.</Text>
+
+          <ChoiceSection title="Number required">
+            <View style={s.choiceWrap}>
+              {STAFF_COUNTS.map(n=><Choice key={n} label={String(n)} selected={staffCount===n} onPress={()=>setStaffCount(n)} compact/>) }
+            </View>
+          </ChoiceSection>
+
+          <ChoiceSection title="Reason / staffing need">
+            <View style={s.choiceWrap}>
+              {STAFF_REASONS.map(reason=><Choice key={reason} label={reason} selected={staffReason===reason} onPress={()=>setStaffReason(reason)}/>) }
+            </View>
+          </ChoiceSection>
+
+          <ChoiceSection title="Required skills / qualifications">
+            <Text style={s.help}>Choose one or more according to the department need.</Text>
+            <View style={s.choiceWrap}>
+              {STAFF_SKILLS.map(skill=><Choice key={skill} label={skill} selected={staffSkills.includes(skill)} onPress={()=>toggleSkill(skill)}/>) }
+            </View>
+          </ChoiceSection>
+
+          <View style={s.selectionSummary}>
+            <Text style={s.summaryTitle}>Selected requirement</Text>
+            <Text>Employees: {staffCount}</Text>
+            <Text>Reason: {staffReason||'Not selected'}</Text>
+            <Text>Skills: {staffSkills.length?staffSkills.join(', '):'Not selected'}</Text>
+          </View>
+
           <View style={s.actions}>
-            <Pressable disabled={!!busy||!staffReason.trim()} style={[s.ok,(!!busy||!staffReason.trim())&&s.disabled]} onPress={()=>run('staff-cashier',()=>requestStaff('CASHIER'))}>
+            <Pressable disabled={!!busy||!staffingReady} style={[s.ok,(!!busy||!staffingReady)&&s.disabled]} onPress={()=>run('staff-cashier',()=>requestStaff('CASHIER'))}>
               <Text style={s.white}>Request Additional Cashier</Text>
             </Pressable>
-            <Pressable disabled={!!busy||!staffReason.trim()} style={[s.ok,(!!busy||!staffReason.trim())&&s.disabled]} onPress={()=>run('staff-accountant',()=>requestStaff('ACCOUNTANT'))}>
+            <Pressable disabled={!!busy||!staffingReady} style={[s.ok,(!!busy||!staffingReady)&&s.disabled]} onPress={()=>run('staff-accountant',()=>requestStaff('ACCOUNTANT'))}>
               <Text style={s.white}>Request Additional Accountant</Text>
             </Pressable>
           </View>
@@ -238,6 +274,16 @@ export function FinanceCentre({payload,onRefresh}:{payload:FinancePayload|null;o
   </>;
 }
 
+function ChoiceSection({title,children}:{title:string;children:any}){
+  return <View style={s.choiceSection}><Text style={s.choiceTitle}>{title}</Text>{children}</View>;
+}
+
+function Choice({label,selected,onPress,compact=false}:{label:string;selected:boolean;onPress:()=>void;compact?:boolean}){
+  return <Pressable onPress={onPress} style={[s.choice,compact&&s.choiceCompact,selected&&s.choiceSelected]}>
+    <Text style={[s.choiceText,selected&&s.choiceTextSelected]}>{selected?'✓ ':''}{label}</Text>
+  </Pressable>;
+}
+
 function Metric({n,t}:{n:number;t:string}){
   return <View style={s.metric}><Text style={s.num}>{n}</Text><Text style={s.meta}>{t}</Text></View>;
 }
@@ -253,6 +299,17 @@ const s=StyleSheet.create({
   hodBox:{borderWidth:1,borderColor:'#bbd8cf',backgroundColor:'#f2f8f6',borderRadius:14,padding:14,marginTop:14},
   hodTitle:{fontWeight:'900',fontSize:17,color:'#0b5d45'},
   hodText:{color:'#334155',marginTop:5,lineHeight:19},
+  choiceSection:{marginTop:14},
+  choiceTitle:{fontWeight:'900',fontSize:14,color:'#14213d',marginBottom:7},
+  help:{fontSize:12,color:'#64748b',marginBottom:7},
+  choiceWrap:{flexDirection:'row',flexWrap:'wrap',gap:7},
+  choice:{borderWidth:1,borderColor:'#cbd5e1',backgroundColor:'#fff',borderRadius:10,paddingVertical:9,paddingHorizontal:10},
+  choiceCompact:{minWidth:42,alignItems:'center'},
+  choiceSelected:{borderColor:'#0b5d45',backgroundColor:'#dff1eb'},
+  choiceText:{fontSize:13,color:'#334155'},
+  choiceTextSelected:{fontWeight:'900',color:'#0b5d45'},
+  selectionSummary:{backgroundColor:'#fff',borderRadius:10,padding:10,marginTop:14,gap:3},
+  summaryTitle:{fontWeight:'900',color:'#14213d'},
   grid:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:12},
   metric:{width:'47%',backgroundColor:'#eef6f3',padding:12,borderRadius:12},
   num:{fontWeight:'900',fontSize:25,color:'#08745a'},
@@ -261,8 +318,7 @@ const s=StyleSheet.create({
   row:{borderTopWidth:1,borderTopColor:'#e5e7eb',paddingVertical:11,gap:4},
   title:{fontWeight:'900'},
   meta:{fontSize:12,color:'#64748b'},
-  actions:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:6},
-  input:{borderWidth:1,borderColor:'#cbd5e1',backgroundColor:'#fff',borderRadius:9,padding:10,marginTop:8},
+  actions:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:10},
   ok:{backgroundColor:'#0b5d45',padding:9,borderRadius:9},
   danger:{backgroundColor:'#9b1c1c',padding:9,borderRadius:9},
   cancel:{backgroundColor:'#e2e8f0',padding:9,borderRadius:9},
