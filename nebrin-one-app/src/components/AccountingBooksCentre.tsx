@@ -1,60 +1,68 @@
 import {useEffect,useMemo,useState} from 'react';
-import {Pressable,StyleSheet,Text,View} from 'react-native';
-import {getFinanceAccountingBooks} from '../lib/api';
+import {Pressable,StyleSheet,Text,TextInput,View} from 'react-native';
+import {getFinanceAccountingBooks,getFinanceBookHelpDashboard,requestTreasurerBookHelp,respondTreasurerBookHelp} from '../lib/api';
 
-type Book={key:string;title:string;group:string;roles:string[];mode?:'work'|'review'};
+type Book={key:string;title:string;group:string;mode?:'work'|'review'};
 const BOOKS:Book[]=[
- {key:'cash_book',title:'Cash Book',group:'Cash & Receipts',roles:['CASHIER','ACCOUNTANT','TREASURER']},
- {key:'petty_cash',title:'Petty Cash Book',group:'Cash & Receipts',roles:['CASHIER','ACCOUNTANT','TREASURER']},
- {key:'receipts',title:'Receipts Register',group:'Cash & Receipts',roles:['CASHIER','ACCOUNTANT','TREASURER']},
- {key:'receipt_vouchers',title:'Receipt Voucher Register',group:'Cash & Receipts',roles:['CASHIER','ACCOUNTANT','TREASURER']},
- {key:'payment_vouchers',title:'Payment Voucher Register',group:'Payments & Expenses',roles:['CASHIER','ACCOUNTANT','TREASURER']},
- {key:'expenses',title:'Expense Register',group:'Payments & Expenses',roles:['ACCOUNTANT','TREASURER']},
- {key:'invoices',title:'Invoices Register',group:'Sales & Revenue',roles:['ACCOUNTANT','TREASURER']},
- {key:'revenue',title:'Income / Revenue Register',group:'Sales & Revenue',roles:['ACCOUNTANT','TREASURER']},
- {key:'journal',title:'General Journal',group:'Journals & Ledgers',roles:['ACCOUNTANT','TREASURER']},
- {key:'ledger',title:'General Ledger',group:'Journals & Ledgers',roles:['ACCOUNTANT','TREASURER']},
- {key:'subsidiary_ledgers',title:'Subsidiary Ledgers',group:'Journals & Ledgers',roles:['ACCOUNTANT','TREASURER']},
- {key:'receivables',title:'Accounts Receivable / Debtors Ledger',group:'Journals & Ledgers',roles:['ACCOUNTANT','TREASURER']},
- {key:'payables',title:'Accounts Payable / Creditors Ledger',group:'Journals & Ledgers',roles:['ACCOUNTANT','TREASURER']},
- {key:'chart_accounts',title:'Chart of Accounts',group:'Journals & Ledgers',roles:['ACCOUNTANT','TREASURER']},
- {key:'trial_balance',title:'Trial Balance',group:'Journals & Ledgers',roles:['ACCOUNTANT','TREASURER']},
- {key:'bank_book',title:'Bank Book',group:'Bank & Treasury',roles:['ACCOUNTANT','TREASURER']},
- {key:'bank_reconciliation',title:'Bank Reconciliation',group:'Bank & Treasury',roles:['ACCOUNTANT','TREASURER']},
- {key:'cheques',title:'Cheque Register',group:'Bank & Treasury',roles:['TREASURER','ACCOUNTANT']},
- {key:'budgets',title:'Budget Book & Budget vs Actual',group:'Budget & Assets',roles:['ACCOUNTANT','TREASURER']},
- {key:'fixed_assets',title:'Fixed Assets Register',group:'Budget & Assets',roles:['ACCOUNTANT','TREASURER']},
- {key:'depreciation',title:'Depreciation Schedule',group:'Budget & Assets',roles:['ACCOUNTANT','TREASURER']},
- {key:'payroll',title:'Payroll Accounting Register',group:'Payroll & Tax',roles:['ACCOUNTANT','TREASURER']},
- {key:'tax',title:'Tax / VAT Register',group:'Payroll & Tax',roles:['ACCOUNTANT','TREASURER']},
- {key:'withholding_tax',title:'Withholding Tax Register',group:'Payroll & Tax',roles:['ACCOUNTANT','TREASURER']},
- {key:'adjustments',title:'Journal Adjustments',group:'Period End',roles:['ACCOUNTANT','TREASURER']},
- {key:'accruals',title:'Accruals & Prepayments',group:'Period End',roles:['ACCOUNTANT','TREASURER']},
- {key:'closing',title:'Period / Year-End Closing Records',group:'Period End',roles:['ACCOUNTANT','TREASURER']},
- {key:'profit_loss',title:'Profit & Loss / Income Statement',group:'Financial Statements',roles:['ACCOUNTANT','TREASURER']},
- {key:'balance_sheet',title:'Statement of Financial Position',group:'Financial Statements',roles:['ACCOUNTANT','TREASURER']},
- {key:'cash_flow',title:'Cash Flow Statement',group:'Financial Statements',roles:['ACCOUNTANT','TREASURER']},
- {key:'equity',title:'Statement of Changes in Equity',group:'Financial Statements',roles:['ACCOUNTANT','TREASURER']},
- {key:'spreadsheet',title:'Spreadsheet / Excel-style Workspace',group:'Workpapers & Records',roles:['CASHIER','ACCOUNTANT','TREASURER']},
- {key:'supporting_docs',title:'Supporting Documents Register',group:'Workpapers & Records',roles:['CASHIER','ACCOUNTANT','TREASURER']},
- {key:'audit_trail',title:'Accounting Audit Trail',group:'Workpapers & Records',roles:['ACCOUNTANT','TREASURER'],mode:'review'},
- {key:'reports_archive',title:'Financial Reports Archive',group:'Workpapers & Records',roles:['ACCOUNTANT','TREASURER'],mode:'review'},
+ {key:'cash_book',title:'Cash Book',group:'Cash & Receipts'},
+ {key:'petty_cash',title:'Petty Cash Book',group:'Cash & Receipts'},
+ {key:'receipts',title:'Receipts Register',group:'Cash & Receipts'},
+ {key:'receipt_vouchers',title:'Receipt Voucher Register',group:'Cash & Receipts'},
+ {key:'payment_vouchers',title:'Payment Voucher Register',group:'Payments & Expenses'},
+ {key:'expenses',title:'Expense Register',group:'Payments & Expenses'},
+ {key:'invoices',title:'Invoices Register',group:'Sales & Revenue'},
+ {key:'revenue',title:'Income / Revenue Register',group:'Sales & Revenue'},
+ {key:'journal',title:'General Journal',group:'Journals & Ledgers'},
+ {key:'ledger',title:'General Ledger',group:'Journals & Ledgers'},
+ {key:'subsidiary_ledgers',title:'Subsidiary Ledgers',group:'Journals & Ledgers'},
+ {key:'receivables',title:'Accounts Receivable / Debtors Ledger',group:'Journals & Ledgers'},
+ {key:'payables',title:'Accounts Payable / Creditors Ledger',group:'Journals & Ledgers'},
+ {key:'chart_accounts',title:'Chart of Accounts',group:'Journals & Ledgers'},
+ {key:'trial_balance',title:'Trial Balance',group:'Journals & Ledgers'},
+ {key:'bank_book',title:'Bank Book',group:'Bank & Treasury'},
+ {key:'bank_reconciliation',title:'Bank Reconciliation',group:'Bank & Treasury'},
+ {key:'cheques',title:'Cheque Register',group:'Bank & Treasury'},
+ {key:'budgets',title:'Budget Book & Budget vs Actual',group:'Budget & Assets'},
+ {key:'fixed_assets',title:'Fixed Assets Register',group:'Budget & Assets'},
+ {key:'depreciation',title:'Depreciation Schedule',group:'Budget & Assets'},
+ {key:'payroll',title:'Payroll Accounting Register',group:'Payroll & Tax'},
+ {key:'tax',title:'Tax / VAT Register',group:'Payroll & Tax'},
+ {key:'withholding_tax',title:'Withholding Tax Register',group:'Payroll & Tax'},
+ {key:'adjustments',title:'Journal Adjustments',group:'Period End'},
+ {key:'accruals',title:'Accruals & Prepayments',group:'Period End'},
+ {key:'closing',title:'Period / Year-End Closing Records',group:'Period End'},
+ {key:'profit_loss',title:'Profit & Loss / Income Statement',group:'Financial Statements'},
+ {key:'balance_sheet',title:'Statement of Financial Position',group:'Financial Statements'},
+ {key:'cash_flow',title:'Cash Flow Statement',group:'Financial Statements'},
+ {key:'equity',title:'Statement of Changes in Equity',group:'Financial Statements'},
+ {key:'spreadsheet',title:'Spreadsheet / Excel-style Workspace',group:'Workpapers & Records'},
+ {key:'supporting_docs',title:'Supporting Documents Register',group:'Workpapers & Records'},
+ {key:'audit_trail',title:'Accounting Audit Trail',group:'Workpapers & Records',mode:'review'},
+ {key:'reports_archive',title:'Financial Reports Archive',group:'Workpapers & Records',mode:'review'},
 ];
 
 export function AccountingBooksCentre({roleCode}:{roleCode:string}){
- const[open,setOpen]=useState(false),[selected,setSelected]=useState<Book|null>(null),[data,setData]=useState<any>(null),[busy,setBusy]=useState(false),[msg,setMsg]=useState<string|null>(null);
- const allowed=useMemo(()=>BOOKS.filter(x=>x.roles.includes(roleCode)),[roleCode]);
- const groups=useMemo(()=>Array.from(new Set(allowed.map(x=>x.group))),[allowed]);
+ const[open,setOpen]=useState(false),[selected,setSelected]=useState<Book|null>(null),[data,setData]=useState<any>(null),[busy,setBusy]=useState(false),[msg,setMsg]=useState<string|null>(null),[helpNote,setHelpNote]=useState(''),[helpOpen,setHelpOpen]=useState(false),[helpData,setHelpData]=useState<any>(null);
+ const groups=useMemo(()=>Array.from(new Set(BOOKS.map(x=>x.group))),[]);
+ const canAskHelp=['CASHIER','ACCOUNTANT'].includes(roleCode);const isTreasurer=roleCode==='TREASURER';
  async function load(){try{setBusy(true);setMsg(null);const r=await getFinanceAccountingBooks();setData(r.data||{})}catch(e){setMsg(e instanceof Error?e.message:String(e))}finally{setBusy(false)}}
- useEffect(()=>{if(open&&!data)load()},[open]);
- function choose(b:Book){setSelected(b);setOpen(false)}
+ async function loadHelp(){try{const r=await getFinanceBookHelpDashboard();setHelpData(r.data||{})}catch(e){setMsg(e instanceof Error?e.message:String(e))}}
+ useEffect(()=>{if(open&&!data)load()},[open]);useEffect(()=>{if(isTreasurer||canAskHelp)loadHelp()},[roleCode]);
+ function choose(b:Book){setSelected(b);setOpen(false);setHelpOpen(false);setHelpNote('')}
  const count=(k:string)=>Number(data?.counts?.[k]??0);
+ async function requestHelp(){if(!selected)return;try{setBusy(true);setMsg(null);await requestTreasurerBookHelp(selected.key,selected.title,helpNote.trim());setHelpNote('');setHelpOpen(false);await loadHelp();setMsg('Assistance request sent to Treasurer. Notification created.')}catch(e){setMsg(e instanceof Error?e.message:String(e))}finally{setBusy(false)}}
+ async function respond(id:string,status:'In Progress'|'Resolved'|'Rejected'){try{setBusy(true);setMsg(null);await respondTreasurerBookHelp(id,status,status==='In Progress'?'Treasurer is reviewing this accounting book request.':status==='Resolved'?'Assistance completed by Treasurer.':'Assistance request could not be accepted.');await loadHelp();setMsg(`Request updated to ${status}. Notification sent to requester.`)}catch(e){setMsg(e instanceof Error?e.message:String(e))}finally{setBusy(false)}}
+ const requests=Array.isArray(helpData?.requests)?helpData.requests:[];
  return <View style={s.box}>
-  <Text style={s.title}>Books of Account</Text><Text style={s.note}>Choose the accounting book you want to work with. Books shown here follow your Finance role and permissions.</Text>
+  <Text style={s.title}>Books of Account</Text><Text style={s.note}>Cashier, Accountant and Treasurer can open the complete accounting library. Permissions inside each book control who may enter, post, verify, approve or review.</Text>
   <Pressable style={s.dropdown} onPress={()=>setOpen(v=>!v)}><View style={{flex:1}}><Text style={s.label}>Select Book of Account</Text><Text style={s.value}>{selected?.title||'Choose accounting book'}</Text></View><Text style={s.arrow}>{open?'▲':'▼'}</Text></Pressable>
-  {open?<View style={s.menu}>{groups.map(g=><View key={g}><Text style={s.group}>{g}</Text>{allowed.filter(x=>x.group===g).map(b=><Pressable key={b.key} style={s.option} onPress={()=>choose(b)}><Text style={s.optionText}>{b.title}</Text><Text style={s.chev}>›</Text></Pressable>)}</View>)}</View>:null}
-  {busy?<Text style={s.note}>Loading accounting books…</Text>:null}{msg?<Text style={s.err}>{msg}</Text>:null}
-  {selected?<View style={s.book}><View style={s.bookHead}><View style={{flex:1}}><Text style={s.bookTitle}>{selected.title}</Text><Text style={s.note}>{selected.mode==='review'?'Review / oversight view':'Accounting work book'} · {roleCode.replaceAll('_',' ')}</Text></View><Pressable style={s.change} onPress={()=>setOpen(true)}><Text style={s.changeText}>Change Book ▼</Text></Pressable></View><View style={s.summary}><Text style={s.summaryNum}>{count(selected.key)}</Text><Text style={s.note}>Current records / lines</Text></View><Text style={s.help}>This book will open inside the same Finance system so entries remain synchronized with journals, ledgers, reports and Audit. Role permissions determine whether you can enter, post, approve or only review records.</Text></View>:null}
+  {open?<View style={s.menu}>{groups.map(g=><View key={g}><Text style={s.group}>{g}</Text>{BOOKS.filter(x=>x.group===g).map(b=><Pressable key={b.key} style={s.option} onPress={()=>choose(b)}><Text style={s.optionText}>{b.title}</Text><Text style={s.chev}>›</Text></Pressable>)}</View>)}</View>:null}
+  {busy?<Text style={s.note}>Working…</Text>:null}{msg?<Text style={s.msg}>{msg}</Text>:null}
+  {selected?<View style={s.book}><View style={s.bookHead}><View style={{flex:1}}><Text style={s.bookTitle}>{selected.title}</Text><Text style={s.note}>{selected.mode==='review'?'Review / oversight book':'Accounting work book'} · {roleCode.replaceAll('_',' ')}</Text></View><Pressable style={s.change} onPress={()=>setOpen(true)}><Text style={s.changeText}>Change Book ▼</Text></Pressable></View><View style={s.summary}><Text style={s.summaryNum}>{count(selected.key)}</Text><Text style={s.note}>Current records / lines</Text></View><Text style={s.help}>All entries stay synchronized with journals, ledgers, financial reports and Audit. Access to sensitive actions remains controlled by role permissions and maker-checker rules.</Text>
+   {canAskHelp?<View style={s.helpBox}><Pressable style={s.helpHead} onPress={()=>setHelpOpen(v=>!v)}><Text style={s.helpTitle}>Need help from Treasurer?</Text><Text style={s.arrow}>{helpOpen?'▲':'▼'}</Text></Pressable>{helpOpen?<><Text style={s.note}>Describe where you are stuck. The selected book will be attached automatically to the request.</Text><TextInput style={s.input} value={helpNote} onChangeText={setHelpNote} placeholder="Briefly describe the problem" multiline/><Pressable disabled={busy} style={[s.primary,busy&&s.disabled]} onPress={requestHelp}><Text style={s.white}>Request Treasurer Assistance</Text></Pressable></>:null}</View>:null}
+  </View>:null}
+  {canAskHelp&&requests.length?<View style={s.queue}><Text style={s.queueTitle}>My Assistance Requests</Text>{requests.slice(0,8).map((x:any)=><View key={x.id} style={s.req}><Text style={s.reqTitle}>{x.book_title}</Text><Text>{x.status}</Text>{x.treasurer_response?<Text style={s.note}>{x.treasurer_response}</Text>:null}</View>)}</View>:null}
+  {isTreasurer?<View style={s.queue}><Text style={s.queueTitle}>Treasurer Assistance Queue</Text><Text style={s.note}>{requests.filter((x:any)=>x.status==='Pending').length} pending request(s)</Text>{requests.slice(0,12).map((x:any)=><View key={x.id} style={s.req}><Text style={s.reqTitle}>{x.requester_name||x.requester_role} · {x.book_title}</Text><Text>{x.requester_role} · {x.status}</Text>{x.request_note?<Text style={s.note}>{x.request_note}</Text>:null}{!['Resolved','Rejected'].includes(x.status)?<View style={s.actions}><Pressable disabled={busy} style={s.primarySmall} onPress={()=>respond(x.id,'In Progress')}><Text style={s.white}>Start Helping</Text></Pressable><Pressable disabled={busy} style={s.primarySmall} onPress={()=>respond(x.id,'Resolved')}><Text style={s.white}>Resolve</Text></Pressable><Pressable disabled={busy} style={s.secondary} onPress={()=>respond(x.id,'Rejected')}><Text>Reject</Text></Pressable></View>:null}</View>)}{!requests.length?<Text>No assistance requests yet.</Text>:null}</View>:null}
  </View>
 }
-const s=StyleSheet.create({box:{borderTopWidth:1,borderTopColor:'#e5e7eb',marginTop:14,paddingTop:14},title:{fontWeight:'900',fontSize:18,color:'#14213d'},note:{fontSize:12,color:'#64748b',lineHeight:18,marginTop:4},dropdown:{borderWidth:1,borderColor:'#b9c8d3',backgroundColor:'#fff',borderRadius:11,padding:11,marginTop:11,flexDirection:'row',alignItems:'center'},label:{fontSize:11,fontWeight:'800',color:'#64748b'},value:{fontSize:14,fontWeight:'900',color:'#14213d',marginTop:2},arrow:{fontWeight:'900',color:'#08745a'},menu:{borderWidth:1,borderColor:'#d7e0e7',borderRadius:11,backgroundColor:'#fff',marginTop:5,padding:8},group:{fontSize:12,fontWeight:'900',color:'#08745a',paddingHorizontal:8,paddingTop:9,paddingBottom:4},option:{flexDirection:'row',alignItems:'center',borderTopWidth:1,borderTopColor:'#eef2f7',paddingVertical:10,paddingHorizontal:8},optionText:{flex:1,fontSize:13,color:'#243447'},chev:{fontSize:20,color:'#64748b'},book:{borderWidth:1,borderColor:'#bbd8cf',backgroundColor:'#f5faf8',borderRadius:12,padding:12,marginTop:10},bookHead:{flexDirection:'row',alignItems:'center',gap:8},bookTitle:{fontSize:16,fontWeight:'900',color:'#0b5d45'},change:{backgroundColor:'#e2e8f0',borderRadius:8,padding:8},changeText:{fontSize:11,fontWeight:'800',color:'#334155'},summary:{backgroundColor:'#fff',borderRadius:10,padding:10,marginTop:10},summaryNum:{fontSize:24,fontWeight:'900',color:'#08745a'},help:{fontSize:12,color:'#475569',lineHeight:18,marginTop:9},err:{color:'#9b1c1c',marginTop:8}});
+const s=StyleSheet.create({box:{borderTopWidth:1,borderTopColor:'#e5e7eb',marginTop:14,paddingTop:14},title:{fontWeight:'900',fontSize:18,color:'#14213d'},note:{fontSize:12,color:'#64748b',lineHeight:18,marginTop:4},dropdown:{borderWidth:1,borderColor:'#b9c8d3',backgroundColor:'#fff',borderRadius:11,padding:11,marginTop:11,flexDirection:'row',alignItems:'center'},label:{fontSize:11,fontWeight:'800',color:'#64748b'},value:{fontSize:14,fontWeight:'900',color:'#14213d',marginTop:2},arrow:{fontWeight:'900',color:'#08745a'},menu:{borderWidth:1,borderColor:'#d7e0e7',borderRadius:11,backgroundColor:'#fff',marginTop:5,padding:8},group:{fontSize:12,fontWeight:'900',color:'#08745a',paddingHorizontal:8,paddingTop:9,paddingBottom:4},option:{flexDirection:'row',alignItems:'center',borderTopWidth:1,borderTopColor:'#eef2f7',paddingVertical:10,paddingHorizontal:8},optionText:{flex:1,fontSize:13,color:'#243447'},chev:{fontSize:20,color:'#64748b'},book:{borderWidth:1,borderColor:'#bbd8cf',backgroundColor:'#f5faf8',borderRadius:12,padding:12,marginTop:10},bookHead:{flexDirection:'row',alignItems:'center',gap:8},bookTitle:{fontSize:16,fontWeight:'900',color:'#0b5d45'},change:{backgroundColor:'#e2e8f0',borderRadius:8,padding:8},changeText:{fontSize:11,fontWeight:'800',color:'#334155'},summary:{backgroundColor:'#fff',borderRadius:10,padding:10,marginTop:10},summaryNum:{fontSize:24,fontWeight:'900',color:'#08745a'},help:{fontSize:12,color:'#475569',lineHeight:18,marginTop:9},msg:{color:'#0b5d45',marginTop:8,fontWeight:'700'},helpBox:{borderTopWidth:1,borderTopColor:'#dbe5df',marginTop:12,paddingTop:10},helpHead:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},helpTitle:{fontWeight:'900',color:'#14213d'},input:{borderWidth:1,borderColor:'#cbd5e1',backgroundColor:'#fff',borderRadius:9,padding:10,marginTop:8},primary:{backgroundColor:'#0b5d45',padding:10,borderRadius:9,alignSelf:'flex-start',marginTop:8},primarySmall:{backgroundColor:'#0b5d45',padding:8,borderRadius:8},secondary:{backgroundColor:'#e2e8f0',padding:8,borderRadius:8},white:{color:'#fff',fontWeight:'800'},disabled:{opacity:.5},queue:{borderTopWidth:1,borderTopColor:'#e5e7eb',marginTop:14,paddingTop:12},queueTitle:{fontWeight:'900',fontSize:16,color:'#14213d'},req:{borderTopWidth:1,borderTopColor:'#eef2f7',paddingVertical:10,gap:3},reqTitle:{fontWeight:'900'},actions:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:7}});
