@@ -3,6 +3,7 @@ import{bootstrapApp,digitalOfficeAction,errorMessage,getCommandCentre,getDigital
 import{supabase}from'../lib/supabase';
 import type{BootstrapPayload,CommandCentrePayload,DigitalOfficeStatus,FinancePayload,HRPayload,NotificationPayload,SecurityPayload,WorkflowPayload}from'../types/app';
 import{AccountingBooksCentre}from'../components/AccountingBooksCentre';
+import{FinancePreflight}from'../components/FinancePreflight';
 import{Card}from'../components/Card';
 import{CommandCentre}from'../components/CommandCentre';
 import{FinanceCentre}from'../components/FinanceCentre';
@@ -32,7 +33,7 @@ export function HomeScreen(){
   <Card title="Work Status"><Text>{a.current_work_status||'Unknown'} · {a.approval_status||'—'}</Text></Card>
   {o?<ModuleBoundary name="Digital Office"><Card title="Digital Office"><Text>Access: {o.office_access?.allowed?'Open':'Closed'}</Text><Text>{o.office_access?.reason}</Text><View style={s.actions}>{!o.attendance?.check_in_at?<A t="Check In" f={()=>act('check_in')}/>:null}{o.attendance?.check_in_at&&!o.attendance?.check_out_at?<A t="Check Out" f={()=>act('check_out')}/>:null}{o.attendance?.check_in_at&&!o.attendance?.check_out_at&&!o.active_break?<A t="Start Break" f={()=>act('start_break')}/>:null}{o.active_break?<A t="End Break" f={()=>act('end_break')}/>:null}</View></Card></ModuleBoundary>:null}
   {(isSecretary||b.navigation.modules.workflows)?<ModuleBoundary name="Workflow"><WorkflowCentre payload={wf} isSecretary={isSecretary} onRefresh={refreshWorkflow}/></ModuleBoundary>:null}
-  {(isFinance||isExec||b.navigation.modules.finance)?<ModuleBoundary name="Finance"><FinanceCentre payload={fin} onRefresh={refreshFinance}/>{['CASHIER','ACCOUNTANT','TREASURER'].includes(role)?<AccountingBooksCentre roleCode={role}/>:null}</ModuleBoundary>:null}
+  {(isFinance||isExec||b.navigation.modules.finance)?<ModuleBoundary name="Finance"><FinanceCentre payload={fin} onRefresh={refreshFinance}/>{['CASHIER','ACCOUNTANT','TREASURER'].includes(role)?<><AccountingBooksCentre roleCode={role}/><FinancePreflight/></>:null}</ModuleBoundary>:null}
   {(isExec||isSecurity)?<ModuleBoundary name="Security Centre"><SecurityCentre payload={sec} isCEO={isCEO} onRefresh={refreshSecurity} departments={departments}/></ModuleBoundary>:null}
   {isExec?<ModuleBoundary name="Command Centre"><CommandCentre payload={c} home={home}/></ModuleBoundary>:null}
   {(isHR||isExec)?<ModuleBoundary name="HR"><HRDashboard payload={hr}/></ModuleBoundary>:null}
