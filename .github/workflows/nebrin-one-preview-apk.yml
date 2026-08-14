@@ -38,6 +38,8 @@ jobs:
           java-version: '17'
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
+      - name: Align Expo SDK patch
+        run: npm install expo@~57.0.13 --no-save --no-audit --no-fund
       - name: Verify TypeScript
         run: npm run typecheck
       - name: Verify Expo project
