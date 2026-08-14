@@ -3,35 +3,99 @@ import {Linking,Pressable,StyleSheet,Text,TextInput,View} from 'react-native';
 import {getFinanceAccountingBooks,getFinanceBookHelpDashboard,requestTreasurerBookHelp,respondTreasurerBookHelp} from '../lib/api';
 
 type Book={key:string;title:string;group:string;mode?:'work'|'review'};
-const ACCOUNTING_WORKBOOK_URL='https://www.nebrinonlineonesignal.com/accounting-workbook';
+
+// IMPORTANT: Accounting books must never use the OneSignal/custom notification domain.
+// This stable Vercel project URL serves the dedicated spreadsheet-style workbook.
+const ACCOUNTING_WORKBOOK_URL='https://nebrin-website.vercel.app/accounting-workbook.html';
+
 const BOOKS:Book[]=[
- {key:'cash_book',title:'Cash Book',group:'Cash & Receipts'},{key:'petty_cash',title:'Petty Cash Book',group:'Cash & Receipts'},{key:'receipts',title:'Receipts Register',group:'Cash & Receipts'},{key:'receipt_vouchers',title:'Receipt Voucher Register',group:'Cash & Receipts'},
- {key:'payment_vouchers',title:'Payment Voucher Register',group:'Payments & Expenses'},{key:'expenses',title:'Expense Register',group:'Payments & Expenses'},{key:'invoices',title:'Invoices Register',group:'Sales & Revenue'},{key:'revenue',title:'Income / Revenue Register',group:'Sales & Revenue'},
- {key:'journal',title:'General Journal',group:'Journals & Ledgers'},{key:'ledger',title:'General Ledger',group:'Journals & Ledgers'},{key:'subsidiary_ledgers',title:'Subsidiary Ledgers',group:'Journals & Ledgers'},{key:'receivables',title:'Accounts Receivable / Debtors Ledger',group:'Journals & Ledgers'},{key:'payables',title:'Accounts Payable / Creditors Ledger',group:'Journals & Ledgers'},{key:'chart_accounts',title:'Chart of Accounts',group:'Journals & Ledgers'},{key:'trial_balance',title:'Trial Balance',group:'Journals & Ledgers'},
- {key:'bank_book',title:'Bank Book',group:'Bank & Treasury'},{key:'bank_reconciliation',title:'Bank Reconciliation',group:'Bank & Treasury'},{key:'cheques',title:'Cheque Register',group:'Bank & Treasury'},
- {key:'budgets',title:'Budget Book & Budget vs Actual',group:'Budget & Assets'},{key:'fixed_assets',title:'Fixed Assets Register',group:'Budget & Assets'},{key:'depreciation',title:'Depreciation Schedule',group:'Budget & Assets'},
- {key:'payroll',title:'Payroll Accounting Register',group:'Payroll & Tax'},{key:'tax',title:'Tax / VAT Register',group:'Payroll & Tax'},{key:'withholding_tax',title:'Withholding Tax Register',group:'Payroll & Tax'},
- {key:'adjustments',title:'Journal Adjustments',group:'Period End'},{key:'accruals',title:'Accruals & Prepayments',group:'Period End'},{key:'closing',title:'Period / Year-End Closing Records',group:'Period End'},
- {key:'profit_loss',title:'Profit & Loss / Income Statement',group:'Financial Statements',mode:'review'},{key:'balance_sheet',title:'Statement of Financial Position',group:'Financial Statements',mode:'review'},{key:'cash_flow',title:'Cash Flow Statement',group:'Financial Statements',mode:'review'},{key:'equity',title:'Statement of Changes in Equity',group:'Financial Statements',mode:'review'},
- {key:'spreadsheet',title:'Spreadsheet / Excel-style Workspace',group:'Workpapers & Records'},{key:'supporting_docs',title:'Supporting Documents Register',group:'Workpapers & Records'},{key:'audit_trail',title:'Accounting Audit Trail',group:'Workpapers & Records',mode:'review'},{key:'reports_archive',title:'Financial Reports Archive',group:'Workpapers & Records',mode:'review'},
+ {key:'cash_book',title:'Cash Book',group:'Cash & Receipts'},
+ {key:'petty_cash',title:'Petty Cash Book',group:'Cash & Receipts'},
+ {key:'receipts',title:'Receipts Register',group:'Cash & Receipts'},
+ {key:'receipt_vouchers',title:'Receipt Voucher Register',group:'Cash & Receipts'},
+ {key:'payment_vouchers',title:'Payment Voucher Register',group:'Payments & Expenses'},
+ {key:'expenses',title:'Expense Register',group:'Payments & Expenses'},
+ {key:'invoices',title:'Invoices Register',group:'Sales & Revenue'},
+ {key:'revenue',title:'Income / Revenue Register',group:'Sales & Revenue'},
+ {key:'journal',title:'General Journal',group:'Journals & Ledgers'},
+ {key:'ledger',title:'General Ledger',group:'Journals & Ledgers'},
+ {key:'subsidiary_ledgers',title:'Subsidiary Ledgers',group:'Journals & Ledgers'},
+ {key:'receivables',title:'Accounts Receivable / Debtors Ledger',group:'Journals & Ledgers'},
+ {key:'payables',title:'Accounts Payable / Creditors Ledger',group:'Journals & Ledgers'},
+ {key:'chart_accounts',title:'Chart of Accounts',group:'Journals & Ledgers'},
+ {key:'trial_balance',title:'Trial Balance',group:'Journals & Ledgers'},
+ {key:'bank_book',title:'Bank Book',group:'Bank & Treasury'},
+ {key:'bank_reconciliation',title:'Bank Reconciliation',group:'Bank & Treasury'},
+ {key:'cheques',title:'Cheque Register',group:'Bank & Treasury'},
+ {key:'budgets',title:'Budget Book & Budget vs Actual',group:'Budget & Assets'},
+ {key:'fixed_assets',title:'Fixed Assets Register',group:'Budget & Assets'},
+ {key:'depreciation',title:'Depreciation Schedule',group:'Budget & Assets'},
+ {key:'payroll',title:'Payroll Accounting Register',group:'Payroll & Tax'},
+ {key:'tax',title:'Tax / VAT Register',group:'Payroll & Tax'},
+ {key:'withholding_tax',title:'Withholding Tax Register',group:'Payroll & Tax'},
+ {key:'adjustments',title:'Journal Adjustments',group:'Period End'},
+ {key:'accruals',title:'Accruals & Prepayments',group:'Period End'},
+ {key:'closing',title:'Period / Year-End Closing Records',group:'Period End'},
+ {key:'profit_loss',title:'Profit & Loss / Income Statement',group:'Financial Statements',mode:'review'},
+ {key:'balance_sheet',title:'Statement of Financial Position',group:'Financial Statements',mode:'review'},
+ {key:'cash_flow',title:'Cash Flow Statement',group:'Financial Statements',mode:'review'},
+ {key:'equity',title:'Statement of Changes in Equity',group:'Financial Statements',mode:'review'},
+ {key:'spreadsheet',title:'Spreadsheet / Excel-style Workspace',group:'Workpapers & Records'},
+ {key:'supporting_docs',title:'Supporting Documents Register',group:'Workpapers & Records'},
+ {key:'audit_trail',title:'Accounting Audit Trail',group:'Workpapers & Records',mode:'review'},
+ {key:'reports_archive',title:'Financial Reports Archive',group:'Workpapers & Records',mode:'review'},
 ];
+
 export function AccountingBooksCentre({roleCode}:{roleCode:string}){
- const[open,setOpen]=useState(false),[selected,setSelected]=useState<Book|null>(null),[data,setData]=useState<any>(null),[busy,setBusy]=useState(false),[msg,setMsg]=useState<string|null>(null),[helpNote,setHelpNote]=useState(''),[helpOpen,setHelpOpen]=useState(false),[helpData,setHelpData]=useState<any>(null);
- const groups=useMemo(()=>Array.from(new Set(BOOKS.map(x=>x.group))),[]);const canAskHelp=['CASHIER','ACCOUNTANT'].includes(roleCode);const isTreasurer=roleCode==='TREASURER';
+ const[open,setOpen]=useState(false);
+ const[selected,setSelected]=useState<Book|null>(null);
+ const[data,setData]=useState<any>(null);
+ const[busy,setBusy]=useState(false);
+ const[msg,setMsg]=useState<string|null>(null);
+ const[helpNote,setHelpNote]=useState('');
+ const[helpOpen,setHelpOpen]=useState(false);
+ const[helpData,setHelpData]=useState<any>(null);
+ const groups=useMemo(()=>Array.from(new Set(BOOKS.map(x=>x.group))),[]);
+ const canAskHelp=['CASHIER','ACCOUNTANT'].includes(roleCode);
+ const isTreasurer=roleCode==='TREASURER';
+
  async function load(){try{setBusy(true);setMsg(null);const r=await getFinanceAccountingBooks();setData(r.data||{})}catch(e){setMsg(e instanceof Error?e.message:String(e))}finally{setBusy(false)}}
  async function loadHelp(){try{const r=await getFinanceBookHelpDashboard();setHelpData(r.data||{})}catch(e){setMsg(e instanceof Error?e.message:String(e))}}
- useEffect(()=>{load()},[roleCode]);useEffect(()=>{if(isTreasurer||canAskHelp)loadHelp()},[roleCode]);
- async function openWorkbook(b:Book){setSelected(b);setOpen(false);setHelpOpen(false);setHelpNote('');setMsg(null);try{const url=`${ACCOUNTING_WORKBOOK_URL}?book=${encodeURIComponent(b.key)}&title=${encodeURIComponent(b.title)}`;const supported=await Linking.canOpenURL(url);if(!supported)throw new Error('No browser is available to open the NEBRIN Online Accounting Workbook.');await Linking.openURL(url);setMsg(`${b.title} opened in your external browser as a dedicated online workbook. It does not open the company homepage.`)}catch(e){setMsg(e instanceof Error?e.message:String(e))}}
+ useEffect(()=>{load()},[roleCode]);
+ useEffect(()=>{if(isTreasurer||canAskHelp)loadHelp()},[roleCode]);
+
+ async function openWorkbook(b:Book){
+  setSelected(b);setOpen(false);setHelpOpen(false);setHelpNote('');setMsg(null);
+  try{
+   const url=`${ACCOUNTING_WORKBOOK_URL}?book=${encodeURIComponent(b.key)}&title=${encodeURIComponent(b.title)}`;
+   await Linking.openURL(url);
+   setMsg(`${b.title} opened in your default browser in the NEBRIN Online Accounting Workbook.`);
+  }catch(e){
+   setMsg(`Unable to open ${b.title} in the browser. ${e instanceof Error?e.message:String(e)}`);
+  }
+ }
+
  async function requestHelp(){if(!selected)return;try{setBusy(true);setMsg(null);await requestTreasurerBookHelp(selected.key,selected.title,helpNote.trim());setHelpNote('');setHelpOpen(false);await loadHelp();setMsg('Assistance request sent to Treasurer. Notification created.')}catch(e){setMsg(e instanceof Error?e.message:String(e))}finally{setBusy(false)}}
  async function respond(id:string,status:'In Progress'|'Resolved'|'Rejected'){try{setBusy(true);setMsg(null);await respondTreasurerBookHelp(id,status,status==='In Progress'?'Treasurer is reviewing this accounting book request.':status==='Resolved'?'Assistance completed by Treasurer.':'Assistance request could not be accepted.');await loadHelp();setMsg(`Request updated to ${status}. Notification sent to requester.`)}catch(e){setMsg(e instanceof Error?e.message:String(e))}finally{setBusy(false)}}
- const requests=Array.isArray(helpData?.requests)?helpData.requests:[];const totalBooks=Number(data?.books?.length||BOOKS.length);const pending=Number(data?.summary?.pending||0);const posted=Number(data?.summary?.posted||0);
- return <View style={s.box}><Text style={s.title}>Books of Account</Text><Text style={s.note}>Choose any accounting book. NEBRIN ONE opens that exact book in your phone browser as an Excel-style online workbook. The app remains the dashboard for summaries, notifications, approvals and synchronized records.</Text>
- <View style={s.metrics}><View style={s.metric}><Text style={s.metricValue}>{totalBooks}</Text><Text style={s.note}>Available books</Text></View><View style={s.metric}><Text style={s.metricValue}>{posted}</Text><Text style={s.note}>Posted</Text></View><View style={s.metric}><Text style={s.metricValue}>{pending}</Text><Text style={s.note}>Pending review</Text></View></View>
- <Pressable style={s.dropdown} onPress={()=>setOpen(v=>!v)}><View style={{flex:1}}><Text style={s.label}>Select Book of Account</Text><Text style={s.value}>{selected?.title||'Choose accounting book'}</Text></View><Text style={s.arrow}>{open?'▲':'▼'}</Text></Pressable>
- {open?<View style={s.menu}>{groups.map(g=><View key={g}><Text style={s.group}>{g}</Text>{BOOKS.filter(x=>x.group===g).map(b=><Pressable key={b.key} style={s.option} onPress={()=>openWorkbook(b)}><View style={{flex:1}}><Text style={s.optionText}>{b.title}</Text><Text style={s.webHint}>{b.mode==='review'?'Open report/review workbook':'Open online working book'}</Text></View><Text style={s.chev}>↗</Text></Pressable>)}</View>)}</View>:null}
- {busy?<Text style={s.note}>Refreshing…</Text>:null}{msg?<Text style={s.msg}>{msg}</Text>:null}
- {selected?<View style={s.webCard}><Text style={s.webTitle}>{selected.title}</Text><Text style={s.note}>This book opens directly in the dedicated NEBRIN Online Accounting Workbook in your external browser. Return to the app and refresh Finance/Books to see synchronized records.</Text><Pressable style={s.primary} onPress={()=>openWorkbook(selected)}><Text style={s.white}>Open {selected.title} Workbook ↗</Text></Pressable>{canAskHelp?<View style={s.helpBox}><Pressable style={s.helpHead} onPress={()=>setHelpOpen(v=>!v)}><Text style={s.helpTitle}>Need help from Treasurer?</Text><Text style={s.arrow}>{helpOpen?'▲':'▼'}</Text></Pressable>{helpOpen?<><Text style={s.note}>Describe where you are stuck. The selected book is attached automatically.</Text><TextInput style={s.input} value={helpNote} onChangeText={setHelpNote} placeholder="Briefly describe the problem" multiline/><Pressable disabled={busy} style={[s.primary,busy&&s.disabled]} onPress={requestHelp}><Text style={s.white}>Request Treasurer Assistance</Text></Pressable></>:null}</View>:null}</View>:null}
- {canAskHelp&&requests.length?<View style={s.queue}><Text style={s.queueTitle}>My Assistance Requests</Text>{requests.slice(0,8).map((x:any)=><View key={x.id} style={s.req}><Text style={s.reqTitle}>{x.book_title}</Text><Text>{x.status}</Text>{x.treasurer_response?<Text style={s.note}>{x.treasurer_response}</Text>:null}</View>)}</View>:null}
- {isTreasurer?<View style={s.queue}><Text style={s.queueTitle}>Treasurer Assistance Queue</Text><Text style={s.note}>{requests.filter((x:any)=>x.status==='Pending').length} pending request(s)</Text>{requests.slice(0,12).map((x:any)=><View key={x.id} style={s.req}><Text style={s.reqTitle}>{x.requester_name||x.requester_role} · {x.book_title}</Text><Text>{x.requester_role} · {x.status}</Text>{x.request_note?<Text style={s.note}>{x.request_note}</Text>:null}{!['Resolved','Rejected'].includes(x.status)?<View style={s.actions}><Pressable disabled={busy} style={s.primarySmall} onPress={()=>respond(x.id,'In Progress')}><Text style={s.white}>Start Helping</Text></Pressable><Pressable disabled={busy} style={s.primarySmall} onPress={()=>respond(x.id,'Resolved')}><Text style={s.white}>Resolve</Text></Pressable><Pressable disabled={busy} style={s.secondary} onPress={()=>respond(x.id,'Rejected')}><Text>Reject</Text></Pressable></View>:null}</View>)}{!requests.length?<Text>No assistance requests yet.</Text>:null}</View>:null}</View>
+
+ const requests=Array.isArray(helpData?.requests)?helpData.requests:[];
+ const totalBooks=Number(data?.books?.length||BOOKS.length);
+ const pending=Number(data?.summary?.pending||0);
+ const posted=Number(data?.summary?.posted||0);
+
+ return <View style={s.box}>
+  <Text style={s.title}>Books of Account</Text>
+  <Text style={s.note}>Choose a book. NEBRIN ONE opens that exact book in your phone's default browser as an Excel-style online workbook. Accounting books do not use the OneSignal notification domain.</Text>
+  <View style={s.metrics}><Metric value={totalBooks} label="Available books"/><Metric value={posted} label="Posted"/><Metric value={pending} label="Pending review"/></View>
+  <Pressable style={s.dropdown} onPress={()=>setOpen(v=>!v)}><View style={{flex:1}}><Text style={s.label}>Select Book of Account</Text><Text style={s.value}>{selected?.title||'Choose accounting book'}</Text></View><Text style={s.arrow}>{open?'▲':'▼'}</Text></Pressable>
+  {open?<View style={s.menu}>{groups.map(g=><View key={g}><Text style={s.group}>{g}</Text>{BOOKS.filter(x=>x.group===g).map(b=><Pressable key={b.key} style={s.option} onPress={()=>openWorkbook(b)}><View style={{flex:1}}><Text style={s.optionText}>{b.title}</Text><Text style={s.webHint}>{b.mode==='review'?'Open report/review workbook':'Open online working book'}</Text></View><Text style={s.chev}>↗</Text></Pressable>)}</View>)}</View>:null}
+  {busy?<Text style={s.note}>Refreshing…</Text>:null}{msg?<Text style={s.msg}>{msg}</Text>:null}
+  {selected?<View style={s.webCard}><Text style={s.webTitle}>{selected.title}</Text><Text style={s.note}>Opens directly at the dedicated NEBRIN workbook URL for this book. Return to the app and refresh Finance/Books to see synchronized records.</Text><Pressable style={s.primary} onPress={()=>openWorkbook(selected)}><Text style={s.white}>Open {selected.title} Workbook ↗</Text></Pressable>{canAskHelp?<View style={s.helpBox}><Pressable style={s.helpHead} onPress={()=>setHelpOpen(v=>!v)}><Text style={s.helpTitle}>Need help from Treasurer?</Text><Text style={s.arrow}>{helpOpen?'▲':'▼'}</Text></Pressable>{helpOpen?<><TextInput style={s.input} value={helpNote} onChangeText={setHelpNote} placeholder="Briefly describe the problem" multiline/><Pressable disabled={busy} style={[s.primary,busy&&s.disabled]} onPress={requestHelp}><Text style={s.white}>Request Treasurer Assistance</Text></Pressable></>:null}</View>:null}</View>:null}
+  {canAskHelp&&requests.length?<View style={s.queue}><Text style={s.queueTitle}>My Assistance Requests</Text>{requests.slice(0,8).map((x:any)=><View key={x.id} style={s.req}><Text style={s.reqTitle}>{x.book_title}</Text><Text>{x.status}</Text>{x.treasurer_response?<Text style={s.note}>{x.treasurer_response}</Text>:null}</View>)}</View>:null}
+  {isTreasurer?<View style={s.queue}><Text style={s.queueTitle}>Treasurer Assistance Queue</Text><Text style={s.note}>{requests.filter((x:any)=>x.status==='Pending').length} pending request(s)</Text>{requests.slice(0,12).map((x:any)=><View key={x.id} style={s.req}><Text style={s.reqTitle}>{x.requester_name||x.requester_role} · {x.book_title}</Text><Text>{x.requester_role} · {x.status}</Text>{x.request_note?<Text style={s.note}>{x.request_note}</Text>:null}{!['Resolved','Rejected'].includes(x.status)?<View style={s.actions}><Pressable disabled={busy} style={s.primarySmall} onPress={()=>respond(x.id,'In Progress')}><Text style={s.white}>Start Helping</Text></Pressable><Pressable disabled={busy} style={s.primarySmall} onPress={()=>respond(x.id,'Resolved')}><Text style={s.white}>Resolve</Text></Pressable><Pressable disabled={busy} style={s.secondary} onPress={()=>respond(x.id,'Rejected')}><Text>Reject</Text></Pressable></View>:null}</View>)}{!requests.length?<Text>No assistance requests yet.</Text>:null}</View>:null}
+ </View>
 }
+
+function Metric({value,label}:{value:number;label:string}){return <View style={s.metric}><Text style={s.metricValue}>{value}</Text><Text style={s.note}>{label}</Text></View>}
+
 const s=StyleSheet.create({box:{borderTopWidth:1,borderTopColor:'#e5e7eb',marginTop:14,paddingTop:14},title:{fontWeight:'900',fontSize:18,color:'#14213d'},note:{fontSize:12,color:'#64748b',lineHeight:18,marginTop:4},metrics:{flexDirection:'row',flexWrap:'wrap',gap:7,marginTop:10},metric:{minWidth:100,flex:1,backgroundColor:'#f5faf8',borderRadius:9,padding:9},metricValue:{fontSize:17,fontWeight:'900',color:'#0b5d45'},dropdown:{borderWidth:1,borderColor:'#b9c8d3',backgroundColor:'#fff',borderRadius:11,padding:11,marginTop:11,flexDirection:'row',alignItems:'center'},label:{fontSize:11,fontWeight:'800',color:'#64748b'},value:{fontSize:14,fontWeight:'900',color:'#14213d',marginTop:2},arrow:{fontWeight:'900',color:'#08745a'},menu:{borderWidth:1,borderColor:'#d7e0e7',borderRadius:11,backgroundColor:'#fff',marginTop:5,padding:8},group:{fontSize:12,fontWeight:'900',color:'#08745a',paddingHorizontal:8,paddingTop:9,paddingBottom:4},option:{flexDirection:'row',alignItems:'center',borderTopWidth:1,borderTopColor:'#eef2f7',paddingVertical:10,paddingHorizontal:8},optionText:{fontSize:13,fontWeight:'800',color:'#243447'},webHint:{fontSize:10,color:'#64748b',marginTop:2},chev:{fontSize:19,color:'#08745a'},webCard:{borderWidth:1,borderColor:'#bbd8cf',backgroundColor:'#f5faf8',borderRadius:12,padding:12,marginTop:10},webTitle:{fontWeight:'900',fontSize:15,color:'#14213d'},msg:{color:'#0b5d45',marginTop:8,fontWeight:'700'},helpBox:{borderTopWidth:1,borderTopColor:'#dbe5df',marginTop:12,paddingTop:10},helpHead:{flexDirection:'row',justifyContent:'space-between',alignItems:'center'},helpTitle:{fontWeight:'900',color:'#14213d'},input:{borderWidth:1,borderColor:'#cbd5e1',backgroundColor:'#fff',borderRadius:9,padding:10,marginTop:8,minHeight:70,textAlignVertical:'top'},primary:{backgroundColor:'#0b5d45',padding:10,borderRadius:9,alignSelf:'flex-start',marginTop:8},primarySmall:{backgroundColor:'#0b5d45',padding:8,borderRadius:8},secondary:{backgroundColor:'#e2e8f0',padding:8,borderRadius:8},white:{color:'#fff',fontWeight:'800'},disabled:{opacity:.5},queue:{borderTopWidth:1,borderTopColor:'#e5e7eb',marginTop:14,paddingTop:12},queueTitle:{fontWeight:'900',fontSize:16,color:'#14213d'},req:{borderTopWidth:1,borderTopColor:'#eef2f7',paddingVertical:10,gap:3},reqTitle:{fontWeight:'900'},actions:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:7}});
