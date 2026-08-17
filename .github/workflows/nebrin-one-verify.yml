@@ -30,21 +30,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Generate dependency lockfile when missing
-        if: github.event_name == 'push' && hashFiles('nebrin-one-app/package-lock.json') == ''
+      - name: Synchronize dependency lockfile
+        if: github.event_name == 'push'
         run: npm install --package-lock-only --no-audit --no-fund
-      - name: Commit dependency lockfile
-        if: github.event_name == 'push' && hashFiles('nebrin-one-app/package-lock.json') != ''
+      - name: Commit dependency lockfile when changed
+        if: github.event_name == 'push'
         working-directory: .
         run: |
-          if git diff --quiet -- nebrin-one-app/package-lock.json && git ls-files --error-unmatch nebrin-one-app/package-lock.json >/dev/null 2>&1; then
-            echo "Lockfile already committed"
+          if git diff --quiet -- nebrin-one-app/package-lock.json; then
+            echo "Lockfile already synchronized"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add nebrin-one-app/package-lock.json
-          git commit -m "Lock NEBRIN ONE dependencies for release builds"
+          git commit -m "Synchronize NEBRIN ONE dependency lockfile"
           git push origin HEAD:${{ github.ref_name }}
       - name: Install dependencies
         run: |
