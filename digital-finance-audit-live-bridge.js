@@ -6,11 +6,11 @@
   const registers={
     invoices:{label:'Invoices',sources:['finance_invoices'],order:'created_at'},
     receipts:{label:'Receipts',sources:['finance_receipts'],order:'created_at'},
-    transactions:{label:'Transactions',sources:['finance_transactions'],order:'created_at'},
+    transactions:{label:'Transactions',sources:['finance_accounting_transactions','finance_transactions'],order:'created_at'},
     expenses:{label:'Expenses',sources:['finance_expenses'],order:'created_at'},
-    journals:{label:'Journals',sources:['finance_accounting_entries','finance_journal_entries'],order:'created_at'},
-    ledger:{label:'General Ledger',sources:['finance_accounting_ledger','finance_ledger_view'],order:'entry_date'},
-    trial_balance:{label:'Trial Balance',sources:['finance_accounting_trial_balance','finance_trial_balance'],order:'account_code'},
+    journals:{label:'Journals',sources:['finance_journals'],order:'created_at'},
+    ledger:{label:'General Ledger',sources:['finance_ledger_view'],order:'entry_date'},
+    trial_balance:{label:'Trial Balance',sources:['finance_trial_balance'],order:'account_code'},
     bank_accounts:{label:'Bank Accounts',sources:['finance_bank_accounts'],order:'created_at'},
     budgets:{label:'Budgets',sources:['finance_budgets'],order:'created_at'},
     cheques:{label:'Cheques',sources:['finance_cheques'],order:'created_at'}
@@ -26,10 +26,10 @@
     $('auditLiveTabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{selected=b.dataset.auditRegister;render()});
   }
   function rowFor(key,x){
-    if(key==='journals')return [x.created_at||x.entry_date,x.journal_number||x.reference,x.reference||'',x.description,x.source_book||'',x.status];
+    if(key==='journals')return [x.created_at||x.entry_date,x.journal_number||x.reference,x.reference||'',x.description||'',x.status||'Posted'];
     if(key==='ledger')return [x.entry_date||x.created_at,x.journal_number||x.reference,x.account_code||'',x.account_name||x.description,money(x.debit),money(x.credit),x.status||'Posted'];
     if(key==='trial_balance')return ['',x.account_code||'',x.account_name,'',money(x.total_debit),money(x.total_credit),money(x.balance)];
-    if(key==='transactions')return [x.created_at||x.transaction_date,x.transaction_no||x.reference||x.source_reference,x.description,x.counterparty||'',money(x.amount??x.total_debit),x.status];
+    if(key==='transactions')return [x.created_at||x.transaction_date,x.transaction_no||x.reference||x.source_reference,x.description,x.counterparty||x.source_book||'',money(x.amount??x.total_debit),x.status];
     if(key==='invoices')return [x.created_at,x.invoice_number||x.reference,x.customer_name||x.customer||'',x.description||'',money(x.total_amount??x.amount),x.status];
     if(key==='receipts')return [x.created_at,x.receipt_number||x.reference,x.payer_name||x.customer_name||'',x.payment_method||'',money(x.amount),x.status||'Recorded'];
     if(key==='expenses')return [x.created_at,x.expense_number||x.reference,x.description,x.payee||'',money(x.amount),x.status];
@@ -39,6 +39,7 @@
     return Object.values(x).slice(0,7);
   }
   function headers(key){
+    if(key==='journals')return ['Date','Journal','Reference','Description','Status'];
     if(key==='ledger')return ['Date','Journal','Account','Account Name / Description','Debit','Credit','Status'];
     if(key==='trial_balance')return ['','Account','Account Name','','Debit','Credit','Balance'];
     if(key==='bank_accounts')return ['Date','Account / Bank','Account No.','Currency','Status'];
