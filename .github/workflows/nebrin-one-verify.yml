@@ -31,7 +31,6 @@ jobs:
         with:
           node-version: '22'
       - name: Synchronize dependency lockfile
-        if: github.event_name == 'push'
         run: npm install --package-lock-only --no-audit --no-fund
       - name: Commit dependency lockfile when changed
         if: github.event_name == 'push'
@@ -47,12 +46,7 @@ jobs:
           git commit -m "Synchronize NEBRIN ONE dependency lockfile"
           git push origin HEAD:${{ github.ref_name }}
       - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci --no-audit --no-fund
-          else
-            npm install --no-audit --no-fund
-          fi
+        run: npm ci --no-audit --no-fund
       - name: TypeScript strict check
         run: npm run typecheck
       - name: Expo Doctor
