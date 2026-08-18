@@ -1,0 +1,28 @@
+{
+  "name":"nebrin-one-app",
+  "version":"1.0.0-alpha.3",
+  "private":true,
+  "main":"node_modules/expo/AppEntry.js",
+  "scripts":{
+    "start":"expo start",
+    "android":"expo run:android",
+    "ios":"expo run:ios",
+    "web":"expo start --web",
+    "typecheck":"tsc --noEmit",
+    "doctor":"npx expo-doctor@latest",
+    "verify":"npm run typecheck && npm run doctor"
+  },
+  "dependencies":{
+    "@react-native-async-storage/async-storage":"^2.0.0",
+    "@supabase/supabase-js":"^2.0.0",
+    "expo":"~57.0.13",
+    "react":"19.2.3",
+    "react-native":"0.86.2",
+    "react-native-url-polyfill":"^2.0.0"
+  },
+  "devDependencies":{
+    "@types/react":"~19.2.0",
+    "typescript":"~6.0.3"
+  },
+  "engines":{"node":">=22.13.0"}
+}

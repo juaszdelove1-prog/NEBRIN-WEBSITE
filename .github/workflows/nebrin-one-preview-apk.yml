@@ -1,0 +1,58 @@
+name: NEBRIN ONE Standalone Preview APK
+
+# Build trigger refresh: Finance Command Centre + Overtime selector
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - nebrin-one-release
+    paths:
+      - 'nebrin-one-app/**'
+      - '.github/workflows/nebrin-one-preview-apk.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'nebrin-one-app/**'
+      - '.github/workflows/nebrin-one-preview-apk.yml'
+
+jobs:
+  build-preview-apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: nebrin-one-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: nebrin-one-app/package-lock.json
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Align Expo SDK patch
+        run: npm install expo@~57.0.13 --no-save --no-audit --no-fund
+      - name: Verify TypeScript
+        run: npm run typecheck
+      - name: Verify Expo project
+        run: npx expo-doctor@latest
+      - name: Generate Android native project
+        run: npx expo prebuild --platform android --non-interactive --clean
+      - name: Build standalone release APK with embedded JS bundle
+        run: ./gradlew assembleRelease
+        working-directory: nebrin-one-app/android
+      - name: Upload NEBRIN ONE standalone APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NEBRIN-ONE-standalone-preview-apk
+          path: nebrin-one-app/android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
