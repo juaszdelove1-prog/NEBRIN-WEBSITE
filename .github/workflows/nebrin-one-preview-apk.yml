@@ -1,0 +1,49 @@
+name: NEBRIN ONE Preview APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - nebrin-one-release
+    paths:
+      - 'nebrin-one-app/**'
+      - '.github/workflows/nebrin-one-preview-apk.yml'
+
+jobs:
+  build-preview-apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: nebrin-one-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: nebrin-one-app/package-lock.json
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify TypeScript
+        run: npm run typecheck
+      - name: Verify Expo project
+        run: npx expo-doctor@latest
+      - name: Generate Android native project
+        run: npx expo prebuild --platform android --non-interactive --clean
+      - name: Build installable preview APK
+        run: ./gradlew assembleDebug
+        working-directory: nebrin-one-app/android
+      - name: Upload NEBRIN ONE APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NEBRIN-ONE-preview-apk
+          path: nebrin-one-app/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
