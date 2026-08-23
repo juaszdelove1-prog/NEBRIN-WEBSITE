@@ -1,0 +1,11 @@
+import {useState} from 'react';
+import {Pressable,StyleSheet,Text,View} from 'react-native';
+import {runFinancePreflight} from '../lib/api';
+
+type Check={name:string;status:'PASS'|'FAIL'|'INFO';details:string};
+export function FinancePreflight(){
+ const[checks,setChecks]=useState<Check[]>([]),[busy,setBusy]=useState(false),[msg,setMsg]=useState<string|null>(null);
+ async function run(){try{setBusy(true);setMsg(null);const r=await runFinancePreflight();setChecks(r.checks);setMsg(r.ok?'Preflight passed. Finance workflow is ready for controlled verification.':'Preflight found an issue. Review the failed check before posting.')}catch(e){setChecks([]);setMsg(e instanceof Error?e.message:String(e))}finally{setBusy(false)}}
+ return <View style={s.card}><View style={s.top}><View style={{flex:1}}><Text style={s.h}>Authenticated Finance Preflight</Text><Text style={s.p}>Checks your live staff session, Finance role, Chart of Accounts, review queue, accounting health and Accounting AI. It does not create a financial transaction.</Text></View><Pressable disabled={busy} style={[s.btn,busy&&{opacity:.55}]} onPress={run}><Text style={s.bt}>{busy?'Checking…':'Run Preflight'}</Text></Pressable></View>{msg?<Text style={s.msg}>{msg}</Text>:null}{checks.map((c,i)=><View key={`${c.name}-${i}`} style={s.row}><Text style={s.name}>{c.name}</Text><Text style={[s.status,c.status==='FAIL'?s.fail:c.status==='INFO'?s.info:s.pass]}>{c.status}</Text><Text style={s.details}>{c.details}</Text></View>)}</View>
+}
+const s=StyleSheet.create({card:{backgroundColor:'#fff',borderRadius:18,padding:18,marginTop:14,gap:10},top:{gap:12},h:{fontSize:21,fontWeight:'900',color:'#13213b'},p:{color:'#64748b',lineHeight:20},btn:{alignSelf:'flex-start',backgroundColor:'#08745a',paddingVertical:11,paddingHorizontal:15,borderRadius:10},bt:{color:'#fff',fontWeight:'900'},msg:{padding:10,borderRadius:9,backgroundColor:'#eef7f3',color:'#155d49'},row:{borderTopWidth:1,borderTopColor:'#edf0f2',paddingTop:10,gap:3},name:{fontWeight:'800',color:'#13213b'},status:{fontWeight:'900'},pass:{color:'#08745a'},fail:{color:'#b42318'},info:{color:'#8a4b00'},details:{color:'#64748b'}});

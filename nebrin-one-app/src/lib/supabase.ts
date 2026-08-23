@@ -1,0 +1,1 @@
+import'react-native-url-polyfill/auto';import{createClient}from'@supabase/supabase-js';const URL='https://oguukuhflamwmgrbdqfk.supabase.co';const KEY='sb_publishable_DfUyGsd9bdFBJmouRZf5Rw_SQBnUYXE';export const supabase=createClient(URL,KEY,{auth:{autoRefreshToken:false,persistSession:false,detectSessionInUrl:false}});
