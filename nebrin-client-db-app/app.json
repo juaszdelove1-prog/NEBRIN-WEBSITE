@@ -1,0 +1,1 @@
+{"expo":{"name":"NEBRIN Client Database","slug":"nebrin-client-database","version":"1.0.0","orientation":"portrait","android":{"package":"com.nebrin.clientdatabase"},"plugins":[["expo-image-picker",{"photosPermission":"NEBRIN needs photo access to attach a customer reference photo.","cameraPermission":"NEBRIN needs camera access to take a customer reference photo."}]]}}
